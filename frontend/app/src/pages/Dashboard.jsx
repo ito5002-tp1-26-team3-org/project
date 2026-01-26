@@ -6,6 +6,37 @@ function pct(x) {
   return (x * 100).toFixed(2);
 }
 
+function toCSV(rows, headers) {
+  // headers: [{ key: "fieldName", label: "Column Label" }, ...]
+  const escape = (v) => {
+    if (v === null || v === undefined) return "";
+    const s = String(v);
+    // escape double quotes
+    const escaped = s.replace(/"/g, '""');
+    // wrap in quotes if needed
+    return /[",\n]/.test(escaped) ? `"${escaped}"` : escaped;
+  };
+
+  const lines = [];
+  lines.push(headers.map((h) => escape(h.label)).join(","));
+  for (const r of rows) {
+    lines.push(headers.map((h) => escape(r[h.key])).join(","));
+  }
+  return lines.join("\n");
+}
+
+function downloadText(filename, text) {
+  const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
 
@@ -96,6 +127,63 @@ export default function Dashboard() {
       .sort((a, b) => (a.year_start ?? 0) - (b.year_start ?? 0));
   }, [data, selectedCouncil]);
 
+  function downloadRankingCSV() {
+    if (!ranking.length) return;
+
+    const rows = ranking.map((r) => ({
+      rank: r.rank,
+      council: r.council,
+      financial_year: r.financial_year,
+      risk_percent: r.risk_score ?? "",
+      recovery_percent: r.recovery_rate != null ? (r.recovery_rate * 100).toFixed(2) : "",
+      collected_tonnes: r.collected ?? "",
+      recycled_tonnes: r.recycled ?? "",
+      population: r.population ?? "",
+    }));
+
+    const csv = toCSV(rows, [
+      { key: "rank", label: "Rank" },
+      { key: "council", label: "Council" },
+      { key: "financial_year", label: "Financial Year" },
+      { key: "risk_percent", label: "Risk Score (%)" },
+      { key: "recovery_percent", label: "Recovery Rate (%)" },
+      { key: "collected_tonnes", label: "Recycling Collected (tonnes)" },
+      { key: "recycled_tonnes", label: "Recycling Recycled (tonnes)" },
+      { key: "population", label: "Population" },
+    ]);
+
+    downloadText(`vic_risk_ranking_${yearStart}.csv`, csv);
+  }
+
+  function downloadTrendCSV() {
+    if (!trend.length || !selectedCouncil) return;
+
+    const rows = trend.map((t) => ({
+      council: selectedCouncil,
+      financial_year: t.financial_year,
+      year_start: t.year_start ?? "",
+      risk_percent: t.risk_score ?? "",
+      recovery_percent: t.recovery_rate != null ? (t.recovery_rate * 100).toFixed(2) : "",
+      collected_tonnes: t.recycling_collected_tonnes ?? "",
+      recycled_tonnes: t.recycling_recycled_tonnes ?? "",
+      population: t.population ?? "",
+    }));
+
+    const csv = toCSV(rows, [
+      { key: "council", label: "Council" },
+      { key: "financial_year", label: "Financial Year" },
+      { key: "year_start", label: "Year Start" },
+      { key: "risk_percent", label: "Risk Score (%)" },
+      { key: "recovery_percent", label: "Recovery Rate (%)" },
+      { key: "collected_tonnes", label: "Recycling Collected (tonnes)" },
+      { key: "recycled_tonnes", label: "Recycling Recycled (tonnes)" },
+      { key: "population", label: "Population" },
+    ]);
+
+    const safeCouncil = selectedCouncil.replace(/[^a-z0-9]+/gi, "_");
+    downloadText(`vic_${safeCouncil}_trend.csv`, csv);
+  }
+
   function logout() {
     localStorage.removeItem("council_authed");
     localStorage.removeItem("council_user");
@@ -148,6 +236,16 @@ export default function Dashboard() {
             <div style={{ color: "#666" }}>
               Source sheet: <b>{data.sourceSheet}</b>
             </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+            <button onClick={downloadRankingCSV} disabled={!ranking.length}>
+              Download ranking CSV
+            </button>
+
+            <button onClick={downloadTrendCSV} disabled={!trend.length || !selectedCouncil}>
+              Download council trend CSV
+            </button>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
