@@ -172,7 +172,7 @@ export default function Dashboard() {
                     {ranking.slice(0, 20).map((r) => (
                       <tr
                         key={r.council}
-                        style={{ cursor: "pointer", background: r.council === selectedCouncil ? "#eef" : "white" }}
+                        style={{ cursor: "pointer", background: r.council === selectedCouncil ? "rgb(42, 0, 139)" : "black" }}
                         onClick={() => setSelectedCouncil(r.council)}
                       >
                         <td>{r.rank}</td>
