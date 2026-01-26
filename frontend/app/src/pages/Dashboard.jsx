@@ -1,117 +1,242 @@
-import Card from "../components/Card";
-import { mockAlerts, mockStats, mockLgas, mockEWasteTypes } from "../data/mockData";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+function pct(x) {
+  if (x === null || x === undefined || Number.isNaN(x)) return "N/A";
+  return (x * 100).toFixed(2);
+}
 
 export default function Dashboard() {
-  const [selectedLga, setSelectedLga] = useState("All");
-  const [selectedType, setSelectedType] = useState("All");
+  const navigate = useNavigate();
+
+  // Guard route
+  useEffect(() => {
+    const ok = localStorage.getItem("council_authed") === "true";
+    if (!ok) navigate("/staff");
+  }, [navigate]);
+
+  const [data, setData] = useState(null);
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  const [yearStart, setYearStart] = useState(null);
+  const [selectedCouncil, setSelectedCouncil] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        setLoading(true);
+        setErr("");
+        const res = await fetch("/data/vic_lga_risk.json");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        if (!cancelled) {
+          setData(json);
+          setYearStart(json.latestYearStart || null);
+        }
+      } catch (e) {
+        if (!cancelled) setErr(`Failed to load council data: ${e.message}`);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  // All available years from the dataset
+  const years = useMemo(() => {
+    if (!data?.timeseriesByCouncil) return [];
+    const s = new Set();
+    for (const council of Object.keys(data.timeseriesByCouncil)) {
+      for (const row of data.timeseriesByCouncil[council]) {
+        if (row.year_start) s.add(row.year_start);
+      }
+    }
+    return Array.from(s).sort((a, b) => b - a);
+  }, [data]);
+
+  // ranking for selected year
+  const ranking = useMemo(() => {
+    if (!data?.timeseriesByCouncil || !yearStart) return [];
+    const rows = [];
+
+    for (const [council, series] of Object.entries(data.timeseriesByCouncil)) {
+      const match = series.find((r) => r.year_start === yearStart);
+      if (!match) continue;
+
+      rows.push({
+        council,
+        financial_year: match.financial_year,
+        risk_score: match.risk_score, // percent
+        recovery_rate: match.recovery_rate, // 0..1
+        collected: match.recycling_collected_tonnes,
+        recycled: match.recycling_recycled_tonnes,
+        population: match.population,
+      });
+    }
+
+    rows.sort((a, b) => (b.risk_score ?? -1) - (a.risk_score ?? -1));
+    return rows.map((r, idx) => ({ ...r, rank: idx + 1 }));
+  }, [data, yearStart]);
+
+  // default select top-ranked council for the chosen year
+  useEffect(() => {
+    if (!selectedCouncil && ranking.length > 0) {
+      setSelectedCouncil(ranking[0].council);
+    }
+  }, [ranking, selectedCouncil]);
+
+  // trend for selected council (all years)
+  const trend = useMemo(() => {
+    if (!data?.timeseriesByCouncil || !selectedCouncil) return [];
+    return (data.timeseriesByCouncil[selectedCouncil] || [])
+      .slice()
+      .sort((a, b) => (a.year_start ?? 0) - (b.year_start ?? 0));
+  }, [data, selectedCouncil]);
+
+  function logout() {
+    localStorage.removeItem("council_authed");
+    localStorage.removeItem("council_user");
+    navigate("/");
+  }
+
+  const selectedYearRow = ranking.find((r) => r.council === selectedCouncil);
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: 24 }}>
-      <h1 style={{ marginTop: 0 }}>Council Dashboard</h1>
-
-      {/* Filters */}
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
-        <label>
-          LGA:&nbsp;
-          <select value={selectedLga} onChange={(e) => setSelectedLga(e.target.value)}>
-            <option>All</option>
-            {mockLgas.map(lga => <option key={lga}>{lga}</option>)}
-          </select>
-        </label>
-
-        <label>
-          E-waste type:&nbsp;
-          <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)}>
-            <option>All</option>
-            {mockEWasteTypes.map(t => <option key={t}>{t}</option>)}
-          </select>
-        </label>
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: 16 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+        <h1>Council Dashboard</h1>
+        <button onClick={logout}>Logout</button>
       </div>
 
-      {/* Layout */}
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
-        {/* Risk Map */}
-        <Card title="Risk Map (placeholder)">
-          <div style={{
-            height: 320,
-            borderRadius: 12,
-            background: "#f3f3f3",
-            border: "1px solid #ddd",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#555"
-          }}>
-            Map will go here (Leaflet/Mapbox).<br />
-            Filters: {selectedLga} / {selectedType}
-          </div>
-          <p style={{ color: "#555" }}>
-            Next: show LGAs/suburbs shaded by risk score, and allow drill-down into misclassification categories.
-          </p>
-        </Card>
+      <p style={{ color: "#555" }}>
+        <b>Risk score (proxy):</b> % of kerbside recycling that was collected but not recycled.
+      </p>
 
-        {/* Alerts */}
-        <Card title="Alerts">
-          <p style={{ marginTop: 0, color: "#555" }}>
-            Example alerts (mock data)
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {mockAlerts.map(a => (
-              <div key={a.id} style={{ border: "1px solid #eee", borderRadius: 10, padding: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                  <b>{a.type}</b>
-                  <span style={{ fontSize: 12, color: "#666" }}>{a.time}</span>
-                </div>
-                <div style={{ fontSize: 13, color: "#444", marginTop: 6 }}>
-                  <div><b>Severity:</b> {a.severity}</div>
-                  <div><b>Location:</b> {a.location}</div>
-                  <div>{a.message}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+      {loading && <p>Loading council dataset…</p>}
+      {err && <p style={{ color: "crimson" }}>{err}</p>}
 
-        {/* Stats */}
-        <div style={{ gridColumn: "1 / -1" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
-            <Card title="Total e-waste collected">
-              <div style={{ fontSize: 24 }}><b>{mockStats.ewasteCollectedTonnes}</b> tonnes</div>
-              <div style={{ color: "#666" }}>Last 30 days (example)</div>
-            </Card>
-            <Card title="E-waste per capita">
-              <div style={{ fontSize: 24 }}><b>{mockStats.ewastePerCapitaKg}</b> kg</div>
-              <div style={{ color: "#666" }}>By LGA population</div>
-            </Card>
-            <Card title="Recovery rate">
-              <div style={{ fontSize: 24 }}><b>{mockStats.recoveryRatePercent}%</b></div>
-              <div style={{ color: "#666" }}>Trend line to be added</div>
-            </Card>
-            <Card title="LGAs above threshold">
-              <div style={{ fontSize: 24 }}><b>{mockStats.lgasAboveRiskThreshold}</b></div>
-              <div style={{ color: "#666" }}>Needs attention</div>
-            </Card>
+      {!loading && !err && data && (
+        <>
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 16 }}>
+            <label>
+              Year:&nbsp;
+              <select
+                value={yearStart ?? ""}
+                onChange={(e) => setYearStart(Number(e.target.value))}
+              >
+                {years.map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Council:&nbsp;
+              <select
+                value={selectedCouncil}
+                onChange={(e) => setSelectedCouncil(e.target.value)}
+              >
+                {ranking.map((r) => (
+                  <option key={r.council} value={r.council}>{r.council}</option>
+                ))}
+              </select>
+            </label>
+
+            <div style={{ color: "#666" }}>
+              Source sheet: <b>{data.sourceSheet}</b>
+            </div>
           </div>
 
-          <div style={{ marginTop: 16 }}>
-            <Card title="Charts (placeholder)">
-              <div style={{
-                height: 180,
-                borderRadius: 12,
-                background: "#f3f3f3",
-                border: "1px solid #ddd",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#555"
-              }}>
-                Time-series and bar charts will go here (Recharts).
-              </div>
-            </Card>
+          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
+            {/* Ranking table */}
+            <div>
+              <h2>Ranked LGAs (Year {yearStart})</h2>
+              {ranking.length === 0 ? (
+                <p>Data unavailable for this year.</p>
+              ) : (
+                <table border="1" cellPadding="6" style={{ borderCollapse: "collapse", width: "100%" }}>
+                  <thead>
+                    <tr>
+                      <th>Rank</th>
+                      <th>Council</th>
+                      <th>Risk (%)</th>
+                      <th>Recovery (%)</th>
+                      <th>Collected (t)</th>
+                      <th>Recycled (t)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ranking.slice(0, 20).map((r) => (
+                      <tr
+                        key={r.council}
+                        style={{ cursor: "pointer", background: r.council === selectedCouncil ? "#eef" : "white" }}
+                        onClick={() => setSelectedCouncil(r.council)}
+                      >
+                        <td>{r.rank}</td>
+                        <td><b>{r.council}</b></td>
+                        <td>{r.risk_score?.toFixed(2) ?? "N/A"}</td>
+                        <td>{pct(r.recovery_rate)}</td>
+                        <td>{r.collected ?? "N/A"}</td>
+                        <td>{r.recycled ?? "N/A"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {/* Detail panel */}
+            <div>
+              <h2>Selected LGA detail</h2>
+
+              {!selectedYearRow ? (
+                <p>Data unavailable for the selected council/year.</p>
+              ) : (
+                <>
+                  <div><b>{selectedCouncil}</b> ({selectedYearRow.financial_year})</div>
+                  <ul>
+                    <li><b>Risk score:</b> {selectedYearRow.risk_score?.toFixed(2) ?? "N/A"}%</li>
+                    <li><b>Recovery rate:</b> {pct(selectedYearRow.recovery_rate)}%</li>
+                    <li><b>Collected:</b> {selectedYearRow.collected ?? "N/A"} tonnes</li>
+                    <li><b>Recycled:</b> {selectedYearRow.recycled ?? "N/A"} tonnes</li>
+                  </ul>
+                </>
+              )}
+
+              <h3>Trend over time (all years)</h3>
+              {trend.length === 0 ? (
+                <p>No trend data available.</p>
+              ) : (
+                <table border="1" cellPadding="6" style={{ borderCollapse: "collapse", width: "100%" }}>
+                  <thead>
+                    <tr>
+                      <th>Financial Year</th>
+                      <th>Risk (%)</th>
+                      <th>Recovery (%)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {trend.map((t) => (
+                      <tr key={t.financial_year}>
+                        <td>{t.financial_year}</td>
+                        <td>{t.risk_score?.toFixed(2) ?? "N/A"}</td>
+                        <td>{pct(t.recovery_rate)}%</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              <p style={{ color: "#666" }}>
+                Iteration 2: add chart + alert thresholds + export.
+              </p>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }
