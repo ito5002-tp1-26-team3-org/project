@@ -51,6 +51,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   const [yearStart, setYearStart] = useState(null);
+  const [riskThreshold, setRiskThreshold] = useState(20); // percent
   const [selectedCouncil, setSelectedCouncil] = useState("");
 
   useEffect(() => {
@@ -88,6 +89,8 @@ export default function Dashboard() {
     return Array.from(s).sort((a, b) => b - a);
   }, [data]);
 
+
+
   // ranking for selected year
   const ranking = useMemo(() => {
     if (!data?.timeseriesByCouncil || !yearStart) return [];
@@ -111,6 +114,13 @@ export default function Dashboard() {
     rows.sort((a, b) => (b.risk_score ?? -1) - (a.risk_score ?? -1));
     return rows.map((r, idx) => ({ ...r, rank: idx + 1 }));
   }, [data, yearStart]);
+
+  const aboveThreshold = useMemo(() => {
+    if (!ranking.length) return [];
+    return ranking.filter((r) => (r.risk_score ?? -1) >= riskThreshold);
+  }, [ranking, riskThreshold]);
+
+
 
   // default select top-ranked council for the chosen year
   useEffect(() => {
@@ -247,6 +257,48 @@ export default function Dashboard() {
               Download council trend CSV
             </button>
           </div>
+          <div style={{ border: "1px solid #ddd", padding: 12, marginBottom: 16 }}>
+            <h2 style={{ marginTop: 0 }}>Alerts (Threshold)</h2>
+
+            <label>
+              Risk threshold (%):&nbsp;
+              <input
+                type="number"
+                value={riskThreshold}
+                onChange={(e) => setRiskThreshold(Number(e.target.value))}
+                style={{ width: 90 }}
+                min="0"
+                max="100"
+                step="0.5"
+              />
+            </label>
+
+            <div style={{ marginTop: 8 }}>
+              <b>{aboveThreshold.length}</b> councils are at or above <b>{riskThreshold}%</b> risk in <b>{yearStart}</b>.
+            </div>
+
+            {aboveThreshold.length === 0 ? (
+              <p style={{ marginTop: 8 }}>No councils exceed the threshold.</p>
+            ) : (
+              <ul style={{ marginTop: 8 }}>
+                {aboveThreshold.slice(0, 10).map((r) => (
+                  <li key={r.council}>
+                    <button
+                      onClick={() => setSelectedCouncil(r.council)}
+                      style={{ padding: "2px 6px", marginRight: 8 }}
+                    >
+                      View
+                    </button>
+                    {r.council} — <b>{r.risk_score?.toFixed(2) ?? "N/A"}%</b>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {aboveThreshold.length > 10 && (
+              <div style={{ color: "#666" }}>Showing first 10 results.</div>
+            )}
+          </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
             {/* Ranking table */}
@@ -270,7 +322,7 @@ export default function Dashboard() {
                     {ranking.slice(0, 20).map((r) => (
                       <tr
                         key={r.council}
-                        style={{ cursor: "pointer", background: r.council === selectedCouncil ? "rgb(42, 0, 139)" : "black" }}
+                        style={{ cursor: "pointer", background: r.council === selectedCouncil ? "#eef" : "white" }}
                         onClick={() => setSelectedCouncil(r.council)}
                       >
                         <td>{r.rank}</td>
