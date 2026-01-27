@@ -54,6 +54,7 @@ export default function Dashboard() {
   const [yearStart, setYearStart] = useState(null);
   const [riskThreshold, setRiskThreshold] = useState(20); // percent
   const [selectedCouncil, setSelectedCouncil] = useState("");
+  const [activeTab, setActiveTab] = useState("ranking"); // "ranking" | "map" | "alerts" | "detail"
 
   useEffect(() => {
     let cancelled = false;
@@ -258,57 +259,91 @@ export default function Dashboard() {
               Download council trend CSV
             </button>
           </div>
-          <div style={{ border: "1px solid #ddd", padding: 12, marginBottom: 16 }}>
-            <h2 style={{ marginTop: 0 }}>Alerts (Threshold)</h2>
 
-            <label>
-              Risk threshold (%):&nbsp;
-              <input
-                type="number"
-                value={riskThreshold}
-                onChange={(e) => setRiskThreshold(Number(e.target.value))}
-                style={{ width: 90 }}
-                min="0"
-                max="100"
-                step="0.5"
-              />
-            </label>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+            <button
+              onClick={() => setActiveTab("ranking")}
+              disabled={activeTab === "ranking"}
+            >
+              Ranking
+            </button>
 
-            <div style={{ marginTop: 8 }}>
-              <b>{aboveThreshold.length}</b> councils are at or above <b>{riskThreshold}%</b> risk in <b>{yearStart}</b>.
-            </div>
+            <button
+              onClick={() => setActiveTab("map")}
+              disabled={activeTab === "map"}
+            >
+              Map
+            </button>
 
-            {aboveThreshold.length === 0 ? (
-              <p style={{ marginTop: 8 }}>No councils exceed the threshold.</p>
-            ) : (
-              <ul style={{ marginTop: 8 }}>
-                {aboveThreshold.slice(0, 10).map((r) => (
-                  <li key={r.council}>
-                    <button
-                      onClick={() => setSelectedCouncil(r.council)}
-                      style={{ padding: "2px 6px", marginRight: 8 }}
-                    >
-                      View
-                    </button>
-                    {r.council} — <b>{r.risk_score?.toFixed(2) ?? "N/A"}%</b>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <button
+              onClick={() => setActiveTab("alerts")}
+              disabled={activeTab === "alerts"}
+            >
+              Alerts
+            </button>
 
-            {aboveThreshold.length > 10 && (
-              <div style={{ color: "#666" }}>Showing first 10 results.</div>
-            )}
+            <button
+              onClick={() => setActiveTab("detail")}
+              disabled={activeTab === "detail"}
+            >
+              Detail & Trend
+            </button>
           </div>
 
-          <CouncilRiskMap
-            ranking={ranking}
-            selectedCouncil={selectedCouncil}
-            onSelectCouncil={setSelectedCouncil}
-          />
+          {activeTab === "alerts" && (
+            <div style={{ border: "1px solid #ddd", padding: 12, marginBottom: 16 }}>
+              <h2 style={{ marginTop: 0 }}>Alerts (Threshold)</h2>
 
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
-            {/* Ranking table */}
+              <label>
+                Risk threshold (%):&nbsp;
+                <input
+                  type="number"
+                  value={riskThreshold}
+                  onChange={(e) => setRiskThreshold(Number(e.target.value))}
+                  style={{ width: 90 }}
+                  min="0"
+                  max="100"
+                  step="0.5"
+                />
+              </label>
+
+              <div style={{ marginTop: 8 }}>
+                <b>{aboveThreshold.length}</b> councils are at or above <b>{riskThreshold}%</b> risk in <b>{yearStart}</b>.
+              </div>
+
+              {aboveThreshold.length === 0 ? (
+                <p style={{ marginTop: 8 }}>No councils exceed the threshold.</p>
+              ) : (
+                <ul style={{ marginTop: 8 }}>
+                  {aboveThreshold.slice(0, 10).map((r) => (
+                    <li key={r.council}>
+                      <button
+                        onClick={() => setSelectedCouncil(r.council)}
+                        style={{ padding: "2px 6px", marginRight: 8 }}
+                      >
+                        View
+                      </button>
+                      {r.council} — <b>{r.risk_score?.toFixed(2) ?? "N/A"}%</b>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {aboveThreshold.length > 10 && (
+                <div style={{ color: "#666" }}>Showing first 10 results.</div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "map" && (
+            <CouncilRiskMap
+              ranking={ranking}
+              selectedCouncil={selectedCouncil}
+              onSelectCouncil={setSelectedCouncil}
+            />
+          )}
+
+          {activeTab === "ranking" && (
             <div>
               <h2>Ranked LGAs (Year {yearStart})</h2>
               {ranking.length === 0 ? (
@@ -344,8 +379,9 @@ export default function Dashboard() {
                 </table>
               )}
             </div>
+          )}
 
-            {/* Detail panel */}
+          {activeTab === "detail" && (
             <div>
               <h2>Selected LGA detail</h2>
 
@@ -391,7 +427,7 @@ export default function Dashboard() {
                 Iteration 2: add visual graph charts
               </p>
             </div>
-          </div>
+          )}
         </>
       )}
     </div>
