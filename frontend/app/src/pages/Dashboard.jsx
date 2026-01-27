@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import CouncilRiskMap from "../components/CouncilRiskMap";
 
 function pct(x) {
   if (x === null || x === undefined || Number.isNaN(x)) return "N/A";
@@ -300,6 +301,12 @@ export default function Dashboard() {
             )}
           </div>
 
+          <CouncilRiskMap
+            ranking={ranking}
+            selectedCouncil={selectedCouncil}
+            onSelectCouncil={setSelectedCouncil}
+          />
+
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
             {/* Ranking table */}
             <div>
@@ -381,7 +388,7 @@ export default function Dashboard() {
               )}
 
               <p style={{ color: "#666" }}>
-                Iteration 2: add chart + alert thresholds + export.
+                Iteration 2: add visual graph charts
               </p>
             </div>
           </div>
