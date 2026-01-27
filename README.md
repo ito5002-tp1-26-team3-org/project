@@ -120,7 +120,6 @@ When changes are merged into `dev`:
 - **GitHub Actions** builds the React app
 - The build output is synced to the S3 bucket
 - **CloudFront** serves the latest site
-- ⚠️ Do not push directly to dev or main (branch protection rules are enabled).
 
 ---
 
