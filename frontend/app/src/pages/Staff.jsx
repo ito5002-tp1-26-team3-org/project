@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-
 const DEMO_USER = "mindy";
 const DEMO_PASS = "ewaste123";
-
 
 export default function Staff() {
   const navigate = useNavigate();
@@ -12,11 +10,9 @@ export default function Staff() {
   const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
 
-
   function login(e) {
     e.preventDefault();
     setErr("");
-
 
     if (username.trim().toLowerCase() === DEMO_USER && password === DEMO_PASS) {
       localStorage.setItem("council_authed", "true");
@@ -27,45 +23,45 @@ export default function Staff() {
     setErr("Invalid demo credentials. Try mindy / ewaste123");
   }
 
-
   return (
-    <div style={{ maxWidth: 700, margin: "0 auto", padding: 16 }}>
+    <div className="container stack">
       <h1>Council Staff Login (Demo)</h1>
-      <p>Iteration 1 uses demo login. (Cognito planned for Iteration 2+)</p>
+      <p className="muted">Iteration 1 uses demo login. (Cognito planned for Iteration 2+)</p>
 
+      <div className="card">
+        <form onSubmit={login} className="formGrid">
+          <label className="field">
+            <span className="label">Username</span>
+            <input
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="input"
+              placeholder="mindy"
+              autoComplete="username"
+            />
+          </label>
 
-      <form onSubmit={login} style={{ display: "grid", gap: 10, maxWidth: 360 }}>
-        <label>
-          Username
-          <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            style={{ width: "100%", padding: 10, fontSize: 16 }}
-            placeholder="mindy"
-          />
-        </label>
+          <label className="field">
+            <span className="label">Password</span>
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              className="input"
+              placeholder="ewaste123"
+              autoComplete="current-password"
+            />
+          </label>
 
+          <button type="submit" className="btn">
+            Login
+          </button>
 
-        <label>
-          Password
-          <input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            type="password"
-            style={{ width: "100%", padding: 10, fontSize: 16 }}
-            placeholder="ewaste123"
-          />
-        </label>
+          {err && <div className="error">{err}</div>}
+        </form>
+      </div>
 
-
-        <button type="submit" style={{ padding: "10px 14px" }}>Login</button>
-
-
-        {err && <div style={{ color: "crimson" }}>{err}</div>}
-      </form>
-
-
-      <div style={{ marginTop: 16, color: "#666" }}>
+      <div className="muted">
         Demo credentials: <b>mindy</b> / <b>ewaste123</b>
       </div>
     </div>

@@ -205,13 +205,13 @@ export default function Dashboard() {
   const selectedYearRow = ranking.find((r) => r.council === selectedCouncil);
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: 16 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+    <div className="container stack">
+      <div className="rowBetween">
         <h1>Council Dashboard</h1>
         <button onClick={logout}>Logout</button>
       </div>
 
-      <p style={{ color: "#555" }}>
+      <p className="muted">
         <b>Risk score (proxy):</b> % of kerbside recycling that was collected but not recycled.
       </p>
 
@@ -220,7 +220,7 @@ export default function Dashboard() {
 
       {!loading && !err && data && (
         <>
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 16 }}>
+          <div className="row wrap">
             <label>
               Year:&nbsp;
               <select
@@ -245,12 +245,13 @@ export default function Dashboard() {
               </select>
             </label>
 
-            <div style={{ color: "#666" }}>
+            <div className="muted">
               Source sheet: <b>{data.sourceSheet}</b>
             </div>
+
           </div>
 
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+          <div className="row wrap">
             <button onClick={downloadRankingCSV} disabled={!ranking.length}>
               Download ranking CSV
             </button>
@@ -260,7 +261,7 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+          <div className="row wrap">
             <button
               onClick={() => setActiveTab("ranking")}
               disabled={activeTab === "ranking"}
@@ -291,8 +292,8 @@ export default function Dashboard() {
           </div>
 
           {activeTab === "alerts" && (
-            <div style={{ border: "1px solid #ddd", padding: 12, marginBottom: 16 }}>
-              <h2 style={{ marginTop: 0 }}>Alerts (Threshold)</h2>
+            <div className="panel">
+              <h2 className="noTopMargin">Alerts (Threshold)</h2>
 
               <label>
                 Risk threshold (%):&nbsp;
@@ -300,26 +301,27 @@ export default function Dashboard() {
                   type="number"
                   value={riskThreshold}
                   onChange={(e) => setRiskThreshold(Number(e.target.value))}
-                  style={{ width: 90 }}
+                  className="inputSmall"
                   min="0"
                   max="100"
                   step="0.5"
                 />
               </label>
 
-              <div style={{ marginTop: 8 }}>
+              <div className="mt8">
                 <b>{aboveThreshold.length}</b> councils are at or above <b>{riskThreshold}%</b> risk in <b>{yearStart}</b>.
               </div>
 
               {aboveThreshold.length === 0 ? (
-                <p style={{ marginTop: 8 }}>No councils exceed the threshold.</p>
+                <p className="mt8">No councils exceed the threshold.</p>
+
               ) : (
-                <ul style={{ marginTop: 8 }}>
+                <ul className="mt8">
                   {aboveThreshold.slice(0, 10).map((r) => (
                     <li key={r.council}>
                       <button
                         onClick={() => setSelectedCouncil(r.council)}
-                        style={{ padding: "2px 6px", marginRight: 8 }}
+                        className="btnTiny"
                       >
                         View
                       </button>
@@ -330,8 +332,9 @@ export default function Dashboard() {
               )}
 
               {aboveThreshold.length > 10 && (
-                <div style={{ color: "#666" }}>Showing first 10 results.</div>
+                <div className="muted">Showing first 10 results.</div>
               )}
+
             </div>
           )}
 
@@ -349,34 +352,37 @@ export default function Dashboard() {
               {ranking.length === 0 ? (
                 <p>Data unavailable for this year.</p>
               ) : (
-                <table border="1" cellPadding="6" style={{ borderCollapse: "collapse", width: "100%" }}>
-                  <thead>
-                    <tr>
-                      <th>Rank</th>
-                      <th>Council</th>
-                      <th>Risk (%)</th>
-                      <th>Recovery (%)</th>
-                      <th>Collected (t)</th>
-                      <th>Recycled (t)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ranking.slice(0, 20).map((r) => (
-                      <tr
-                        key={r.council}
-                        style={{ cursor: "pointer", background: r.council === selectedCouncil ? "#eef" : "white" }}
-                        onClick={() => setSelectedCouncil(r.council)}
-                      >
-                        <td>{r.rank}</td>
-                        <td><b>{r.council}</b></td>
-                        <td>{r.risk_score?.toFixed(2) ?? "N/A"}</td>
-                        <td>{pct(r.recovery_rate)}</td>
-                        <td>{r.collected ?? "N/A"}</td>
-                        <td>{r.recycled ?? "N/A"}</td>
+                <div className="tableWrap">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Rank</th>
+                        <th>Council</th>
+                        <th>Risk (%)</th>
+                        <th>Recovery (%)</th>
+                        <th>Collected (t)</th>
+                        <th>Recycled (t)</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {ranking.slice(0, 20).map((r) => (
+                        <tr
+                          key={r.council}
+                          className={r.council === selectedCouncil ? "clickRow selected" : "clickRow"}
+                          onClick={() => setSelectedCouncil(r.council)}
+                        >
+
+                          <td>{r.rank}</td>
+                          <td><b>{r.council}</b></td>
+                          <td>{r.risk_score?.toFixed(2) ?? "N/A"}</td>
+                          <td>{pct(r.recovery_rate)}</td>
+                          <td>{r.collected ?? "N/A"}</td>
+                          <td>{r.recycled ?? "N/A"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           )}
@@ -403,29 +409,33 @@ export default function Dashboard() {
               {trend.length === 0 ? (
                 <p>No trend data available.</p>
               ) : (
-                <table border="1" cellPadding="6" style={{ borderCollapse: "collapse", width: "100%" }}>
-                  <thead>
-                    <tr>
-                      <th>Financial Year</th>
-                      <th>Risk (%)</th>
-                      <th>Recovery (%)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {trend.map((t) => (
-                      <tr key={t.financial_year}>
-                        <td>{t.financial_year}</td>
-                        <td>{t.risk_score?.toFixed(2) ?? "N/A"}</td>
-                        <td>{pct(t.recovery_rate)}%</td>
+                <div className="tableWrap">
+                  <table className="table">
+
+                    <thead>
+                      <tr>
+                        <th>Financial Year</th>
+                        <th>Risk (%)</th>
+                        <th>Recovery (%)</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {trend.map((t) => (
+                        <tr key={t.financial_year}>
+                          <td>{t.financial_year}</td>
+                          <td>{t.risk_score?.toFixed(2) ?? "N/A"}</td>
+                          <td>{pct(t.recovery_rate)}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
 
-              <p style={{ color: "#666" }}>
+              <p className="muted">
                 Iteration 2: add visual graph charts
               </p>
+
             </div>
           )}
         </>
