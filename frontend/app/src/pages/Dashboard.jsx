@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CouncilRiskMap from "../components/CouncilRiskMap";
 
 function pct(x) {
@@ -8,13 +8,10 @@ function pct(x) {
 }
 
 function toCSV(rows, headers) {
-  // headers: [{ key: "fieldName", label: "Column Label" }, ...]
   const escape = (v) => {
     if (v === null || v === undefined) return "";
     const s = String(v);
-    // escape double quotes
     const escaped = s.replace(/"/g, '""');
-    // wrap in quotes if needed
     return /[",\n]/.test(escaped) ? `"${escaped}"` : escaped;
   };
 
@@ -41,7 +38,6 @@ function downloadText(filename, text) {
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  // Guard route
   useEffect(() => {
     const ok = localStorage.getItem("council_authed") === "true";
     if (!ok) navigate("/staff");
@@ -52,9 +48,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   const [yearStart, setYearStart] = useState(null);
-  const [riskThreshold, setRiskThreshold] = useState(20); // percent
+  const [riskThreshold, setRiskThreshold] = useState(20);
   const [selectedCouncil, setSelectedCouncil] = useState("");
-  const [activeTab, setActiveTab] = useState("ranking"); // "ranking" | "map" | "alerts" | "detail"
+  const [activeTab, setActiveTab] = useState("ranking");
 
   useEffect(() => {
     let cancelled = false;
@@ -79,7 +75,6 @@ export default function Dashboard() {
     return () => { cancelled = true; };
   }, []);
 
-  // All available years from the dataset
   const years = useMemo(() => {
     if (!data?.timeseriesByCouncil) return [];
     const s = new Set();
@@ -91,9 +86,6 @@ export default function Dashboard() {
     return Array.from(s).sort((a, b) => b - a);
   }, [data]);
 
-
-
-  // ranking for selected year
   const ranking = useMemo(() => {
     if (!data?.timeseriesByCouncil || !yearStart) return [];
     const rows = [];
@@ -105,8 +97,8 @@ export default function Dashboard() {
       rows.push({
         council,
         financial_year: match.financial_year,
-        risk_score: match.risk_score, // percent
-        recovery_rate: match.recovery_rate, // 0..1
+        risk_score: match.risk_score,
+        recovery_rate: match.recovery_rate,
         collected: match.recycling_collected_tonnes,
         recycled: match.recycling_recycled_tonnes,
         population: match.population,
@@ -122,16 +114,12 @@ export default function Dashboard() {
     return ranking.filter((r) => (r.risk_score ?? -1) >= riskThreshold);
   }, [ranking, riskThreshold]);
 
-
-
-  // default select top-ranked council for the chosen year
   useEffect(() => {
     if (!selectedCouncil && ranking.length > 0) {
       setSelectedCouncil(ranking[0].council);
     }
   }, [ranking, selectedCouncil]);
 
-  // trend for selected council (all years)
   const trend = useMemo(() => {
     if (!data?.timeseriesByCouncil || !selectedCouncil) return [];
     return (data.timeseriesByCouncil[selectedCouncil] || [])
@@ -206,9 +194,16 @@ export default function Dashboard() {
 
   return (
     <div className="container stack">
+      <div className="pageTopNav">
+        <Link className="btnSecondary linkBtn" to="/">Home</Link>
+      </div>
+
       <div className="rowBetween">
-        <h1>Council Dashboard</h1>
-        <button onClick={logout}>Logout</button>
+        <div className="titleRow">
+          <span className="pageIcon dashboard" aria-hidden="true">📊</span>
+          <h1>Council Dashboard</h1>
+        </div>
+        <button onClick={logout} className="btnPrimary">Logout</button>
       </div>
 
       <p className="muted">
@@ -223,10 +218,7 @@ export default function Dashboard() {
           <div className="row wrap">
             <label>
               Year:&nbsp;
-              <select
-                value={yearStart ?? ""}
-                onChange={(e) => setYearStart(Number(e.target.value))}
-              >
+              <select value={yearStart ?? ""} onChange={(e) => setYearStart(Number(e.target.value))}>
                 {years.map((y) => (
                   <option key={y} value={y}>{y}</option>
                 ))}
@@ -235,10 +227,7 @@ export default function Dashboard() {
 
             <label>
               Council:&nbsp;
-              <select
-                value={selectedCouncil}
-                onChange={(e) => setSelectedCouncil(e.target.value)}
-              >
+              <select value={selectedCouncil} onChange={(e) => setSelectedCouncil(e.target.value)}>
                 {ranking.map((r) => (
                   <option key={r.council} value={r.council}>{r.council}</option>
                 ))}
@@ -248,51 +237,35 @@ export default function Dashboard() {
             <div className="muted">
               Source sheet: <b>{data.sourceSheet}</b>
             </div>
-
           </div>
 
           <div className="row wrap">
-            <button onClick={downloadRankingCSV} disabled={!ranking.length}>
+            <button onClick={downloadRankingCSV} disabled={!ranking.length} className="btnSecondary">
               Download ranking CSV
             </button>
 
-            <button onClick={downloadTrendCSV} disabled={!trend.length || !selectedCouncil}>
+            <button onClick={downloadTrendCSV} disabled={!trend.length || !selectedCouncil} className="btnSecondary">
               Download council trend CSV
             </button>
           </div>
 
-          <div className="row wrap">
-            <button
-              onClick={() => setActiveTab("ranking")}
-              disabled={activeTab === "ranking"}
-            >
+          <div className="tabs" role="tablist" aria-label="Dashboard tabs">
+            <button type="button" className={activeTab === "ranking" ? "tabBtn tabBtnActive" : "tabBtn"} onClick={() => setActiveTab("ranking")}>
               Ranking
             </button>
-
-            <button
-              onClick={() => setActiveTab("map")}
-              disabled={activeTab === "map"}
-            >
+            <button type="button" className={activeTab === "map" ? "tabBtn tabBtnActive" : "tabBtn"} onClick={() => setActiveTab("map")}>
               Map
             </button>
-
-            <button
-              onClick={() => setActiveTab("alerts")}
-              disabled={activeTab === "alerts"}
-            >
+            <button type="button" className={activeTab === "alerts" ? "tabBtn tabBtnActive" : "tabBtn"} onClick={() => setActiveTab("alerts")}>
               Alerts
             </button>
-
-            <button
-              onClick={() => setActiveTab("detail")}
-              disabled={activeTab === "detail"}
-            >
+            <button type="button" className={activeTab === "detail" ? "tabBtn tabBtnActive" : "tabBtn"} onClick={() => setActiveTab("detail")}>
               Detail & Trend
             </button>
           </div>
 
           {activeTab === "alerts" && (
-            <div className="panel">
+            <div className="panel panelAccentRose">
               <h2 className="noTopMargin">Alerts (Threshold)</h2>
 
               <label>
@@ -314,18 +287,14 @@ export default function Dashboard() {
 
               {aboveThreshold.length === 0 ? (
                 <p className="mt8">No councils exceed the threshold.</p>
-
               ) : (
                 <ul className="mt8">
                   {aboveThreshold.slice(0, 10).map((r) => (
                     <li key={r.council}>
-                      <button
-                        onClick={() => setSelectedCouncil(r.council)}
-                        className="btnTiny"
-                      >
+                      <button onClick={() => setSelectedCouncil(r.council)} className="btnTiny">
                         View
                       </button>
-                      {r.council} — <b>{r.risk_score?.toFixed(2) ?? "N/A"}%</b>
+                      &nbsp;{r.council} — <b>{r.risk_score?.toFixed(2) ?? "N/A"}%</b>
                     </li>
                   ))}
                 </ul>
@@ -334,20 +303,23 @@ export default function Dashboard() {
               {aboveThreshold.length > 10 && (
                 <div className="muted">Showing first 10 results.</div>
               )}
-
             </div>
           )}
 
           {activeTab === "map" && (
-            <CouncilRiskMap
-              ranking={ranking}
-              selectedCouncil={selectedCouncil}
-              onSelectCouncil={setSelectedCouncil}
-            />
+            <div className="panel mapPanel panelAccent">
+              <div className="mapViewport">
+                <CouncilRiskMap
+                  ranking={ranking}
+                  selectedCouncil={selectedCouncil}
+                  onSelectCouncil={setSelectedCouncil}
+                />
+              </div>
+            </div>
           )}
 
           {activeTab === "ranking" && (
-            <div>
+            <div className="stack">
               <h2>Ranked LGAs (Year {yearStart})</h2>
               {ranking.length === 0 ? (
                 <p>Data unavailable for this year.</p>
@@ -371,7 +343,6 @@ export default function Dashboard() {
                           className={r.council === selectedCouncil ? "clickRow selected" : "clickRow"}
                           onClick={() => setSelectedCouncil(r.council)}
                         >
-
                           <td>{r.rank}</td>
                           <td><b>{r.council}</b></td>
                           <td>{r.risk_score?.toFixed(2) ?? "N/A"}</td>
@@ -388,13 +359,13 @@ export default function Dashboard() {
           )}
 
           {activeTab === "detail" && (
-            <div>
+            <div className="stack">
               <h2>Selected LGA detail</h2>
 
               {!selectedYearRow ? (
                 <p>Data unavailable for the selected council/year.</p>
               ) : (
-                <>
+                <div className="panel panelAccentBlue">
                   <div><b>{selectedCouncil}</b> ({selectedYearRow.financial_year})</div>
                   <ul>
                     <li><b>Risk score:</b> {selectedYearRow.risk_score?.toFixed(2) ?? "N/A"}%</li>
@@ -402,7 +373,7 @@ export default function Dashboard() {
                     <li><b>Collected:</b> {selectedYearRow.collected ?? "N/A"} tonnes</li>
                     <li><b>Recycled:</b> {selectedYearRow.recycled ?? "N/A"} tonnes</li>
                   </ul>
-                </>
+                </div>
               )}
 
               <h3>Trend over time (all years)</h3>
@@ -411,7 +382,6 @@ export default function Dashboard() {
               ) : (
                 <div className="tableWrap">
                   <table className="table">
-
                     <thead>
                       <tr>
                         <th>Financial Year</th>
@@ -432,10 +402,7 @@ export default function Dashboard() {
                 </div>
               )}
 
-              <p className="muted">
-                Iteration 2: add visual graph charts
-              </p>
-
+              <p className="muted">Iteration 2: add visual graph charts</p>
             </div>
           )}
         </>

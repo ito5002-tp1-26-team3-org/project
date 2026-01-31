@@ -12,7 +12,7 @@ function StatCard({ value, label, note }) {
 
 function Section({ title, subtitle, children, id }) {
   return (
-    <section className="stack" style={{ marginTop: 24 }} id={id}>
+    <section className="stack sectionBlock" id={id}>
       <div>
         <h2 className="noTopMargin" style={{ marginBottom: 4 }}>{title}</h2>
         {subtitle ? <div className="muted">{subtitle}</div> : null}
@@ -25,35 +25,37 @@ function Section({ title, subtitle, children, id }) {
 export default function Home() {
   return (
     <div className="container stack">
-      {/* Header */}
       <header className="rowBetween">
-        <h1 className="noTopMargin">E-Waste Manager</h1>
+        <div className="titleRow">
+          <span className="pageIcon home" aria-hidden="true">♻️</span>
+          <h1 className="noTopMargin">E-Waste Manager</h1>
+        </div>
 
         <div className="row">
           <Link to="/resident">Resident</Link>
           <span aria-hidden="true">|</span>
-          <Link to="/staff">Council Staff</Link>
+          <Link to="/dashboard">Council Staff</Link>
         </div>
       </header>
 
-      {/* Hero */}
       <Section
         title="Sustainable E-Waste Management"
         subtitle="Building a Greener Future Through Smart Recycling"
       >
-        <p className="muted">
-          Join residents and businesses in a community-driven initiative to properly manage electronic waste and
-          create a sustainable future.
-        </p>
+        <div className="hero stack">
+          <p className="muted">
+            Join residents and businesses in a community-driven initiative to properly manage electronic waste and
+            create a sustainable future.
+          </p>
 
-        <div className="row wrap">
-          <Link to="/resident">Get Started (Resident)</Link>
-          <Link to="/staff">Get Started (Council Staff)</Link>
-          <a href="#learn-more">Learn More</a>
+          <div className="row wrap">
+            <Link className="btnPrimary linkBtn" to="/resident">For Residents</Link>
+            <Link className="btnSecondary linkBtn" to="/dashboard">For Staff</Link>
+            <a className="btnSecondary linkBtn" href="#learn-more">Learn More</a>
+          </div>
         </div>
       </Section>
 
-      {/* Our Impact */}
       <Section title="Our Impact" subtitle="Real-time statistics across our LGA">
         <div className="gridCards">
           <StatCard value="95,420" label="Items Recycled This Year" />
@@ -63,7 +65,6 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* National Stats */}
       <Section
         title="National E-Waste Statistics"
         subtitle="Verified data from Australian Bureau of Statistics & National Waste Report 2024 (DCCEEW)"
@@ -116,7 +117,6 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* How it works */}
       <Section id="learn-more" title="How It Works" subtitle="Simple steps to make a big difference">
         <ol className="stack">
           <li>
@@ -131,7 +131,6 @@ export default function Home() {
         </ol>
       </Section>
 
-      {/* Platform Features */}
       <Section title="Platform Features" subtitle="Everything you need for effective e-waste management">
         <div className="gridFeature">
           <div className="panel">
@@ -156,7 +155,6 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* Local Impact */}
       <Section title="Our Local Impact" subtitle="Together, we’re contributing to Australia’s recycling goals">
         <div className="gridCardsWide">
           <StatCard
@@ -177,7 +175,6 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* Footer */}
       <footer className="footer">
         <div className="footerGrid">
           <div>

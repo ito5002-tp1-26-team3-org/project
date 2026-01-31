@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const DEMO_USER = "mindy";
 const DEMO_PASS = "ewaste123";
@@ -25,7 +25,15 @@ export default function Staff() {
 
   return (
     <div className="container stack">
-      <h1>Council Staff Login (Demo)</h1>
+      <div className="pageTopNav">
+        <Link className="btnSecondary linkBtn" to="/">Home</Link>
+      </div>
+
+      <div className="titleRow">
+        <span className="pageIcon staff" aria-hidden="true">🏛️</span>
+        <h1>Council Staff Login (Demo)</h1>
+      </div>
+
       <p className="muted">Iteration 1 uses demo login. (Cognito planned for Iteration 2+)</p>
 
       <div className="card">
@@ -53,9 +61,7 @@ export default function Staff() {
             />
           </label>
 
-          <button type="submit" className="btn">
-            Login
-          </button>
+          <button type="submit" className="btn">Login</button>
 
           {err && <div className="error">{err}</div>}
         </form>
