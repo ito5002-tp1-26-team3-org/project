@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 function mapsLink(address, suburb) {
   const q = encodeURIComponent([address, suburb].filter(Boolean).join(", "));
@@ -265,7 +266,9 @@ export default function Resident() {
     <div className="container stack">
       <div className="rowBetween">
         <h1 className="noTopMargin">Resident Portal</h1>
-        <div className="muted">Iteration 1 (demo data)</div>
+        <div className="pageTopNav">
+          <Link className="btnSecondary linkBtn" to="/">Home</Link>
+        </div>
       </div>
 
       <div className="gridStats">
