@@ -24,17 +24,16 @@ export default function Staff() {
   }
 
   return (
-    <div className="container stack">
-      <div className="pageTopNav">
+    <div className="container stack centerPage">
+      <div className="loginHeader">
+        <span className="pageIcon staff" aria-hidden="true">🏛️</span>
+        <h1 className="noTopMargin">Council Staff Login</h1>
         <Link className="btnSecondary linkBtn" to="/">Home</Link>
       </div>
 
-      <div className="titleRow">
-        <span className="pageIcon staff" aria-hidden="true">🏛️</span>
-        <h1>Council Staff Login (Demo)</h1>
-      </div>
-
-      <p className="muted">Iteration 1 uses demo login. (Cognito planned for Iteration 2+)</p>
+      <p className="muted" style={{ maxWidth: 520 }}>
+        Iteration 1 uses demo login. (Cognito planned for Iteration 2+)
+      </p>
 
       <div className="card">
         <form onSubmit={login} className="formGrid">

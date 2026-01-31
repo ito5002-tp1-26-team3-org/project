@@ -25,19 +25,14 @@ function Section({ title, subtitle, children, id }) {
 export default function Home() {
   return (
     <div className="container stack">
-      <header className="rowBetween">
-        <div className="titleRow">
-          <span className="pageIcon home" aria-hidden="true">♻️</span>
-          <h1 className="noTopMargin">E-Waste Manager</h1>
+      <div className="rowBetween">
+        <span className="pageIcon resident" aria-hidden="true">♻️</span>
+        <h1 className="noTopMargin">E-Waste Manager</h1>
+        <div className="pageTopNav">
         </div>
+      </div>
 
-        <div className="row">
-          <Link to="/resident">Resident</Link>
-          <span aria-hidden="true">|</span>
-          <Link to="/dashboard">Council Staff</Link>
-        </div>
-      </header>
-
+    
       <Section
         title="Sustainable E-Waste Management"
         subtitle="Building a Greener Future Through Smart Recycling"

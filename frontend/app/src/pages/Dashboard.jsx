@@ -194,18 +194,18 @@ export default function Dashboard() {
 
   return (
     <div className="container stack">
-      <div className="pageTopNav">
-        <Link className="btnSecondary linkBtn" to="/">Home</Link>
-      </div>
+
 
       <div className="rowBetween">
-        <div className="titleRow">
-          <span className="pageIcon dashboard" aria-hidden="true">📊</span>
-          <h1>Council Dashboard</h1>
+        <span className="pageIcon resident" aria-hidden="true">📊</span>
+        <h1 className="noTopMargin">Council Dashboard</h1>
+        <div className="pageTopNav">
+          <Link className="btnSecondary linkBtn" to="/">Home</Link>
+          <button onClick={logout} className="btnPrimary">Logout</button>
         </div>
-        <button onClick={logout} className="btnPrimary">Logout</button>
+        
       </div>
-
+    
       <p className="muted">
         <b>Risk score (proxy):</b> % of kerbside recycling that was collected but not recycled.
       </p>
