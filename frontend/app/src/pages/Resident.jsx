@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 
 function mapsLink(address, suburb) {
   const q = encodeURIComponent([address, suburb].filter(Boolean).join(", "));
@@ -157,11 +156,21 @@ export default function Resident() {
     return () => { cancelled = true; };
   }, []);
 
+  // ✅ Autocomplete suburb list (unique + sorted)
+  const suburbOptions = useMemo(() => {
+    const set = new Set();
+    for (const f of facilities) {
+      const s = (f.suburb || "").trim();
+      if (s) set.add(s);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [facilities]);
+
   const results = useMemo(() => {
     const q = submitted.trim().toUpperCase();
     if (!q) return [];
     return facilities
-      .filter((f) => (f.suburb || "").toUpperCase() === q)
+      .filter((f) => (f.suburb || "").trim().toUpperCase() === q)
       .slice(0, 25);
   }, [facilities, submitted]);
 
@@ -254,15 +263,8 @@ export default function Resident() {
 
   return (
     <div className="container stack">
-      <div className="pageTopNav">
-        <Link className="btnSecondary linkBtn" to="/">Home</Link>
-      </div>
-
       <div className="rowBetween">
-        <div className="titleRow">
-          <span className="pageIcon resident" aria-hidden="true">👤</span>
-          <h1 className="noTopMargin">Resident Portal</h1>
-        </div>
+        <h1 className="noTopMargin">Resident Portal</h1>
         <div className="muted">Iteration 1 (demo data)</div>
       </div>
 
@@ -283,7 +285,9 @@ export default function Resident() {
         <div className="stack">
           <div className="stack">
             <h2 className="noTopMargin">E-Waste Disposal Guides</h2>
-            <div className="muted">Click on each category to learn how to properly dispose of different types of electronic waste.</div>
+            <div className="muted">
+              Click on each category to learn how to properly dispose of different types of electronic waste.
+            </div>
           </div>
 
           <div className="gridGuides">
@@ -298,17 +302,29 @@ export default function Resident() {
             ))}
           </div>
 
-          <div className="panel stack panelAccentBlue">
+          <div className="panel stack">
             <h3 className="noTopMargin">Find a nearby drop-off point</h3>
-            <div className="muted">Search your suburb to find nearby e-waste facilities (Victoria dataset).</div>
+            <div className="muted">
+              Start typing a suburb and pick from the dropdown suggestions.
+            </div>
 
             <form onSubmit={onSearch} className="row wrap">
-              <input
-                value={suburbInput}
-                onChange={(e) => setSuburbInput(e.target.value)}
-                placeholder="Enter suburb (e.g., Glen Iris)"
-                className="input"
-              />
+              <div style={{ width: "min(520px, 100%)" }}>
+                <input
+                  value={suburbInput}
+                  onChange={(e) => setSuburbInput(e.target.value)}
+                  placeholder="Enter suburb (e.g., Glen Iris)"
+                  className="input"
+                  list="suburb-options"
+                  autoComplete="off"
+                />
+                <datalist id="suburb-options">
+                  {suburbOptions.map((s) => (
+                    <option key={s} value={s} />
+                  ))}
+                </datalist>
+              </div>
+
               <button type="submit" className="btnPrimary">Search</button>
             </form>
 
@@ -316,7 +332,9 @@ export default function Resident() {
             {facErr && <p style={{ color: "crimson" }}>{facErr}</p>}
 
             {!loadingFacilities && !facErr && submitted.trim() && results.length === 0 && (
-              <p className="muted">No nearby facilities found for “{submitted}”. Try a neighbouring suburb or check spelling.</p>
+              <p className="muted">
+                No nearby facilities found for “{submitted}”. Try a neighbouring suburb or check spelling.
+              </p>
             )}
 
             {!loadingFacilities && !facErr && results.length > 0 && (
@@ -334,7 +352,12 @@ export default function Resident() {
                             {f.infrastructureType ? ` • ${f.infrastructureType}` : ""}
                           </div>
                         </div>
-                        <a className="btnSecondary linkBtn" href={mapsLink(f.address, f.suburb)} target="_blank" rel="noreferrer">
+                        <a
+                          className="btnSecondary"
+                          href={mapsLink(f.address, f.suburb)}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           Directions
                         </a>
                       </div>
@@ -345,7 +368,7 @@ export default function Resident() {
             )}
           </div>
 
-          <div className="panel stack panelAccent">
+          <div className="panel stack">
             <h3 className="noTopMargin" id="data-wiping">Data wiping help</h3>
             <div className="muted">Simple steps to protect your personal data before recycling:</div>
 
@@ -370,7 +393,9 @@ export default function Resident() {
               </div>
             </div>
 
-            <div className="muted">Iteration 2: add certified wiping services directory + printable checklist.</div>
+            <div className="muted">
+              Iteration 2: add certified wiping services directory + printable checklist.
+            </div>
           </div>
         </div>
       )}
@@ -382,7 +407,7 @@ export default function Resident() {
             <div className="muted">Earn $2.00 credit for each item recycled properly</div>
           </div>
 
-          <div className="panel panelAccentAmber">
+          <div className="panel">
             <div className="muted">Available Balance</div>
             <div className="moneyBig">${availableCredit.toFixed(2)}</div>
           </div>
@@ -420,7 +445,7 @@ export default function Resident() {
             <div className="muted">Redeem your recycling credits for council services and local discounts</div>
           </div>
 
-          <div className="panel rowBetween wrap panelAccentPurple">
+          <div className="panel rowBetween wrap">
             <div>
               <div className="muted">Available Points</div>
               <div className="moneyBig">{points}</div>
