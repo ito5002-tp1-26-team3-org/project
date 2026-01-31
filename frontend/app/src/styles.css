@@ -50,7 +50,7 @@ body{
 
 /* Typography */
 h1,h2,h3,h4{ margin: 0 0 8px 0; letter-spacing: -0.2px; }
-h1{ font-size: 28px; font-weight: 800; }
+h1{ font-size: 30px; font-weight: 800; }
 h2{ font-size: 20px; font-weight: 800; }
 h3{ font-size: 16px; font-weight: 800; }
 h4{ font-size: 14px; font-weight: 800; }
@@ -85,7 +85,7 @@ li{ line-height: 1.6; }
 .stack{
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 .row{
@@ -830,3 +830,36 @@ h2::after{
 .pageIcon.staff{ background: rgba(245,158,11,.14); border-color: rgba(245,158,11,.22); }
 .pageIcon.dashboard{ background: rgba(15,118,110,.14); border-color: rgba(15,118,110,.22); }
 .pageIcon.home{ background: rgba(16,185,129,.14); border-color: rgba(16,185,129,.22); }
+
+/* =========================
+   Home: colored stat blocks + footer tint
+   ========================= */
+
+.panel.statCard{
+  position: relative;
+  overflow: hidden;
+}
+
+.panel.statCard.statCard-teal{
+  background: radial-gradient(520px 220px at 0% 0%, rgba(15,118,110,.14), transparent 60%), rgba(255,255,255,.85);
+  border-left: 5px solid rgba(15,118,110,.30);
+}
+
+.panel.statCard.statCard-blue{
+  background: radial-gradient(520px 220px at 0% 0%, rgba(59,130,246,.14), transparent 60%), rgba(255,255,255,.85);
+  border-left: 5px solid rgba(59,130,246,.30);
+}
+
+.panel.statCard.statCard-amber{
+  background: radial-gradient(520px 220px at 0% 0%, rgba(245,158,11,.16), transparent 60%), rgba(255,255,255,.85);
+  border-left: 5px solid rgba(245,158,11,.34);
+}
+
+.panel.statCard.statCard-purple{
+  background: radial-gradient(520px 220px at 0% 0%, rgba(139,92,246,.14), transparent 60%), rgba(255,255,255,.85);
+  border-left: 5px solid rgba(139,92,246,.30);
+}
+.panel.statCard.statCard-rose{
+  background: radial-gradient(520px 220px at 0% 0%, rgba(244,63,94,.14), transparent 60%), rgba(255,255,255,.85);
+  border-left: 5px solid rgba(244,63,94,.30);
+}
