@@ -455,8 +455,8 @@ export default function Resident() {
               <div className="moneyBig">{points}</div>
             </div>
             <div className="muted" style={{ textAlign: "right" }}>
-              <div>1 point = $0.10 earned</div>
-              <div>= ${(points * 0.10).toFixed(2)} value</div>
+              <div>1 point = $2.00 earned</div>
+              <div>= ${(points * 2.00).toFixed(2)} value</div>
             </div>
           </div>
 
