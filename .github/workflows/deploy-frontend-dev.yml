@@ -39,3 +39,10 @@ jobs:
       - name: Sync build output to S3
         run: |
           aws s3 sync frontend/app/dist/ s3://${{ secrets.S3_BUCKET }}/ --delete
+
+      - name: Set cache headers for index.html
+        run: |
+          aws s3 cp s3://${{ secrets.S3_BUCKET }}/index.html s3://${{ secrets.S3_BUCKET }}/index.html \
+            --metadata-directive REPLACE \
+            --cache-control "no-cache, no-store, must-revalidate" \
+            --content-type "text/html"
