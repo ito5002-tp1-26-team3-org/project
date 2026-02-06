@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
-import { isInGroup } from "../auth/authService";
-import { logout } from "../auth/authService";
+import { isInGroup, logout } from "../auth/authService";
 
 function StatCard({ value, label, note, variant = "teal" }) {
   return (
@@ -25,6 +24,21 @@ function Section({ title, subtitle, children, id }) {
   );
 }
 
+function Disclosure({ title, subtitle, children, defaultOpen = false }) {
+  return (
+    <details className="panel detailsCard" open={defaultOpen}>
+      <summary className="detailsSummary">
+        <div>
+          <div className="detailsTitle">{title}</div>
+          {subtitle ? <div className="muted">{subtitle}</div> : null}
+        </div>
+        <span className="chev" aria-hidden="true">▾</span>
+      </summary>
+      <div className="detailsBody">{children}</div>
+    </details>
+  );
+}
+
 export default function Home() {
   const { user, loading } = useAuth();
 
@@ -33,169 +47,182 @@ export default function Home() {
 
   return (
     <div className="container stack">
-      <div className="rowBetween">
-        <span className="pageIcon resident" aria-hidden="true">♻️</span>
-        <h1 className="noTopMargin">E-Waste Manager</h1>
+      {/* Sticky header band (you already have CSS for this) */}
+      <div className="headerBand">
+        <div className="headerBandInner">
+          <div className="headerLeft">
+            <Link to="/" className="brandLink">
+              <span className="brandMark" aria-hidden="true">♻️</span>
+              <span className="brandText">E-Waste Manager</span>
+            </Link>
+            <div className="muted headerSub">Supporting responsible e-waste disposal and local decision-making</div>
+          </div>
 
-        <div className="pageTopNav">
-          {!loading && user ? (
-            <button className="btnSecondary linkBtn" onClick={() => logout()}>
-              Logout
-            </button>
-          ) : null}
+          <div className="headerRight">
+            <Link className="btnSecondary linkBtn" to="/resident">Resident portal</Link>
+            <Link className="btnSecondary linkBtn" to="/staff">Council staff</Link>
+
+            {!loading && user ? (
+              <button className="btnPrimary" type="button" onClick={() => logout()}>
+                Sign out
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
 
+      {/* Hero */}
       <Section
-        title="Sustainable E-Waste Management"
-        subtitle="Building a Greener Future Through Smart Recycling"
+        title="Supporting responsible e-waste disposal across Victoria"
+        subtitle="A practical portal for residents and councils."
       >
         <div className="hero stack">
-          <p className="muted">
-            Join residents and businesses in a community-driven initiative to properly manage electronic waste and
-            create a sustainable future.
+          <p className="muted" style={{ maxWidth: 900 }}>
+            Use the resident portal to find drop-off options and understand correct disposal. Council staff can use the
+            dashboard to view mapped indicators, monitor trends, and export data for reporting.
           </p>
 
-          <div className="row wrap">
-            {/* Portal entry points */}
-            <Link className="btnPrimary linkBtn" to="/resident">For Residents</Link>
-            <Link className="btnSecondary linkBtn" to="/staff">For Staff</Link>
-            <a className="btnSecondary linkBtn" href="#learn-more">Learn More</a>
+          <div className="trustRow">
+            <span className="iconTag iconBlue">ABS</span>
+            <span className="iconTag iconPurple">DCCEEW</span>
+            <span className="iconTag iconAmber">Sustainability Victoria</span>
+          </div>
 
-            {/* Helpful “continue” buttons if already signed in */}
+          <div className="heroActions">
+            <Link className="btnPrimary linkBtn" to="/resident">Open resident portal</Link>
+            <Link className="btnSecondary linkBtn" to="/staff">Open staff portal</Link>
+            
+
             {!loading && user && isStaff ? (
-              <Link className="btnPrimary linkBtn" to="/dashboard">Go to Dashboard</Link>
+              <Link className="btnPrimary linkBtn" to="/dashboard">Go to dashboard</Link>
             ) : null}
-
             {!loading && user && isResident ? (
-              <Link className="btnPrimary linkBtn" to="/resident">Go to Resident Portal</Link>
+              <Link className="btnPrimary linkBtn" to="/resident">Go to resident portal</Link>
             ) : null}
           </div>
 
           {!loading && user && !isStaff && !isResident ? (
-            <div className="panel" style={{ marginTop: 12 }}>
-              <b>Signed in</b>
-              <div className="muted">
-                Your account isn’t assigned to Staff or Residents yet. Ask an admin to add you to a group.
+            <div className="panel panelAccentRose">
+              <b>Account not assigned</b>
+              <div className="muted mt8">
+                Your account isn’t assigned to <b>Staff</b> or <b>Residents</b>. Ask an administrator to add you to a group.
               </div>
             </div>
           ) : null}
         </div>
       </Section>
 
-      <Section title="Our Impact" subtitle="Real-time statistics across our LGA">
-        <div className="gridCards">
-          <StatCard variant="rose" value="95,420" label="Items Recycled This Year" />
-          <StatCard variant="blue" value="12,450" label="Active Participants" />
-          <StatCard variant="purple" value="20" label="Drop-off Points" />
-          <StatCard variant="amber" value="85%" label="Proper Classification Rate" />
-        </div>
-      </Section>
-
-      <Section
-        title="National E-Waste Statistics"
-        subtitle="Verified data from Australian Bureau of Statistics & National Waste Report 2024 (DCCEEW)"
-      >
-        <div className="gridCardsWide">
-          <StatCard
-            value="500,000"
-            label="Tonnes of E-Waste Generated Annually"
-            note="Australia produces 500,000 tonnes of electronic waste every year."
-          />
-          <StatCard
-            value="~50%"
-            label="E-Waste Recycling Rate"
-            note="Only about half of all e-waste is currently recycled (26.6% for hazardous waste)."
-          />
-          <StatCard
-            value="75.8M"
-            label="Total Waste Generated (2018–19)"
-            note="Million tonnes of solid waste — 10% increase over two years."
-          />
-          <StatCard
-            value="16.3%"
-            label="Household Waste Contribution"
-            note="Households contribute 12.4 million tonnes of Australia’s total waste."
-          />
-          <StatCard
-            value="47%"
-            label="Household Plastics Waste"
-            note="Households are the largest contributor to plastic waste streams."
-          />
-          <StatCard
-            value="42%"
-            label="Household Organics Waste"
-            note="Households contribute 42% of organic waste streams."
-          />
-        </div>
-
-        <div className="panel">
-          <h3 className="noTopMargin">⚠️ Data Source & Technical Note</h3>
-          <p className="noTopMargin">
-            <b>Sources:</b> ABS Waste Account Australia (Experimental Estimates) & National Waste and Resource Recovery
-            Report 2024 (DCCEEW)
-          </p>
-          <p className="muted" style={{ marginBottom: 0 }}>
-            <b>Note:</b> The ~50% e-waste recycling rate is a high-level policy estimate used in national waste reports.
-            ABS experimental data shows hazardous waste (which includes e-waste components) had a recovery rate of 26.6%
-            in 2018–19. Households are major contributors to difficult waste streams, making education and incentives
-            important for improving outcomes.
-          </p>
-        </div>
-      </Section>
-
-      <Section id="learn-more" title="How It Works" subtitle="Simple steps to make a big difference">
-        <ul className="stack">
-          <li><b>1️⃣ Register & Learn</b> — Access guides on how to properly sort and dispose of different types of e-waste.</li>
-          <li><b>2️⃣ Recycle & Track</b> — Drop off e-waste at collection points and track your impact.</li>
-          <li><b>3️⃣ Earn Rewards</b> — Get $0.10 credit per item recycled, redeem vouchers, and access partner deals.</li>
-        </ul>
-      </Section>
-
-      <Section title="Platform Features" subtitle="Everything you need for effective e-waste management">
+      {/* Start / Journey */}
+      <Section id="start" title="Start here" subtitle="Choose the pathway that matches your role.">
         <div className="gridFeature">
-          <div className="panel">
-            <h3 className="noTopMargin">👤 For Residents</h3>
-            <ul className="stack">
-              <li><b>Comprehensive Disposal Guides</b> — preparation tips, accepted items, drop-off locations</li>
-              <li><b>Earn Incentives</b> — $0.10 credit per item recycled</li>
-              <li><b>Partner Deals</b> — discounts from authorised partners</li>
-              <li><b>Education & Impact Tracking</b> — learn and track contributions</li>
-            </ul>
+          <div className="panel panelAccentBlue stack">
+            <div className="statKicker">Residents</div>
+            <h3 className="noTopMargin">Find drop-off options and disposal guidance</h3>
+            <div className="muted">
+              Use the suburb finder, read disposal guides, and sign in to access incentives and vouchers.
+            </div>
+            <div className="row wrap mt12">
+              <Link className="btnPrimary linkBtn" to="/resident">Resident portal</Link>
+              <a className="btnSecondary linkBtn" href="#guidance">Read guidance</a>
+            </div>
           </div>
 
-          <div className="panel">
-            <h3 className="noTopMargin">🏛️ For Council Staff</h3>
-            <ul className="stack">
-              <li><b>Interactive Risk Mapping</b> — filter and identify high-risk areas</li>
-              <li><b>Underserved Area Analysis</b> — disposal sites vs population</li>
-              <li><b>Time-based Trend Analysis</b> — track changes over time</li>
-              <li><b>Alert System</b> — notify when thresholds/anomalies occur (Iteration 2)</li>
-            </ul>
+          <div className="panel panelAccentAmber stack">
+            <div className="statKicker">Council staff</div>
+            <h3 className="noTopMargin">Monitor risk indicators and export reports</h3>
+            <div className="muted">
+              View ranked LGAs, map risk categories, review trends over time, and download CSVs for reporting.
+            </div>
+            <div className="row wrap mt12">
+              <Link className="btnPrimary linkBtn" to="/staff">Staff portal</Link>
+              <a className="btnSecondary linkBtn" href="#method">Risk score definition</a>
+            </div>
           </div>
         </div>
       </Section>
 
-      <Section title="Our Local Impact" subtitle="Together, we’re contributing to Australia’s recycling goals">
+      {/* Keep stats restrained */}
+      <Section title="Key indicators" subtitle="High-level context only (expand below for details).">
         <div className="gridCardsWide">
-          <StatCard
-            variant="blue"
-            value="42.5 Tonnes"
-            label="E-waste diverted from landfill this year"
-            note="Part of Australia’s 500,000 tonne annual challenge."
-          />
-          <StatCard
-            variant="purple"
-            value="180,000 kg"
-            label="CO₂ emissions prevented"
-            note="Through proper recycling processes."
-          />
-          <StatCard
-            variant="amber"
-            value="85%"
-            label="Local material recovery rate"
-            note="Exceeding the national average of ~50%."
-          />
+          <StatCard variant="rose" value="500,000" label="Tonnes of e-waste annually (AU)" note="National context indicator." />
+          <StatCard variant="blue" value="~50%" label="Estimated recycling rate (AU)" note="High-level indicator used in national reporting." />
+          <StatCard variant="amber" value="Risk score" label="Proxy for missed recycling" note="% collected but not recycled." />
+        </div>
+      </Section>
+
+      {/* Progressive disclosure instead of big blocks */}
+      <Section id="guidance" title="Guidance" subtitle="Expand only what you need.">
+        <div className="stack">
+          <Disclosure
+            title="How the platform works"
+            subtitle="Simple steps for residents and councils."
+            defaultOpen
+          >
+            <ol className="stack">
+              <li><b>Learn</b> — disposal guidance, accepted items, safe handling tips.</li>
+              <li><b>Dispose</b> — locate drop-off options using the suburb finder.</li>
+              <li><b>Improve</b> — councils use the dashboard to identify higher-risk areas and track changes over time.</li>
+            </ol>
+
+            <div className="row wrap mt12">
+              <Link className="btnPrimary linkBtn" to="/resident">Find drop-off options</Link>
+              <Link className="btnSecondary linkBtn" to="/staff">Council dashboard</Link>
+            </div>
+          </Disclosure>
+
+          <Disclosure
+            title="What counts as e-waste"
+            subtitle="Common examples and handling guidance."
+          >
+            <ul className="stack">
+              <li>Phones, tablets, laptops, computers, and peripherals.</li>
+              <li>Chargers, cables, small electronics and accessories.</li>
+              <li>Batteries and battery-powered devices (follow battery safety guidance).</li>
+              <li>Large items such as TVs, printers, and audio equipment.</li>
+            </ul>
+            <div className="muted mt8">
+              For item-specific steps, use the disposal guides in the resident portal.
+            </div>
+          </Disclosure>
+        </div>
+      </Section>
+
+      <Section id="method" title="Methodology" subtitle="How “risk” is calculated in the dashboard.">
+        <div className="stack">
+          <Disclosure
+            title="Risk score definition"
+            subtitle="Used to support prioritisation and reporting."
+            defaultOpen
+          >
+            <div className="panel panelAccent">
+              <div><b>Definition</b></div>
+              <div className="muted mt8">
+                <b>Risk score</b> is the percentage of kerbside recycling that was <b>collected</b> but <b>not recycled</b> for a given council area and year.
+              </div>
+              <div className="muted mt12">
+                <b>Formula:</b> Risk (%) = (1 − Recovery rate) × 100, where Recovery rate = Recycled ÷ Collected.
+              </div>
+              <div className="muted mt12">
+                This is an indicator designed for planning and prioritisation. It is not a direct measurement of illegal dumping
+                or household non-compliance.
+              </div>
+            </div>
+          </Disclosure>
+
+          <Disclosure
+            title="National data note"
+            subtitle="Context indicators used in the home page."
+          >
+            <div className="panel">
+              <h3 className="noTopMargin">Sources</h3>
+              <p className="noTopMargin">
+                <b>Sources:</b> ABS Waste Account Australia (Experimental Estimates) and National Waste and Resource Recovery Report (DCCEEW).
+              </p>
+              <p className="muted" style={{ marginBottom: 0 }}>
+                Figures are included for national context. Local outcomes vary by council, waste stream, and collection model.
+              </p>
+            </div>
+          </Disclosure>
         </div>
       </Section>
 
@@ -203,28 +230,30 @@ export default function Home() {
         <div className="footerGrid">
           <div>
             <b>E-Waste Manager</b>
-            <div className="muted">Building sustainable communities through smart e-waste management.</div>
+            <div className="muted">A practical tool for responsible disposal and data-informed local decision-making.</div>
           </div>
 
           <div>
             <b>Quick Links</b>
             <ul className="stack">
-              <li><a href="#learn-more">How It Works</a></li>
-              <li><Link to="/resident">Collection Points</Link></li>
-              <li><Link to="/staff">Council Dashboard</Link></li>
+              <li><a href="#start">Start here</a></li>
+              <li><Link to="/resident">Resident portal</Link></li>
+              <li><Link to="/staff">Council staff portal</Link></li>
+              <li><a href="#method">Risk score definition</a></li>
             </ul>
           </div>
 
           <div>
             <b>Resources</b>
             <ul className="stack">
-              <li><Link to="/resident">Disposal Guides</Link></li>
+              <li><Link to="/resident">Disposal guides</Link></li>
+              <li><Link to="/resident">Drop-off finder</Link></li>
             </ul>
           </div>
 
           <div>
             <b>Contact</b>
-            <div>info@ecowaste.gov</div>
+            <div>Service desk: info@ecowaste.gov</div>
             <div>(555) 123-4567</div>
             <div>123 Green Street</div>
             <div>City, State 12345</div>

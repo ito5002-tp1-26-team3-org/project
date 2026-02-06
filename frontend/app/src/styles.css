@@ -888,3 +888,34 @@ h2::after{
   align-items: center;
   gap: 12px;
 }
+
+/* =========================
+   Home journey)
+   ========================= */
+
+.trustRow{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.heroActions{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.detailsCard{ padding: 0; overflow: hidden; }
+.detailsSummary{
+  list-style: none;
+  cursor: pointer;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.detailsSummary::-webkit-details-marker{ display: none; }
+.detailsBody{ padding: 0 14px 14px; }
+.detailsTitle{ font-weight: 900; }
