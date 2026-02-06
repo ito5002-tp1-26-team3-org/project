@@ -1,0 +1,15 @@
+# env files (Vite)
+.env
+.env.*
+!.env.example
+
+# build outputs
+dist/
+build/
+
+# deps
+node_modules/
+
+# OS/editor junk
+.DS_Store
+.vscode/
