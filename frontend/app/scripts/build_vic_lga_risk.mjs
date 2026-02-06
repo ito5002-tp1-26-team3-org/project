@@ -12,6 +12,14 @@ function toNumber(v) {
   return Number.isFinite(n) ? n : null;
 }
 
+function round2(n) {
+  if (n === null || n === undefined) return null;
+  const x = Number(n);
+  if (!Number.isFinite(x)) return null;
+  return Math.round(x * 100) / 100;
+}
+
+
 function safeDiv(a, b) {
   if (a === null || b === null || b === 0) return null;
   return a / b;
@@ -48,9 +56,12 @@ for (const r of rows) {
   const collected = toNumber(r.kerbside_recycling_total_collected_tonnes);
   const recycled = toNumber(r.kerbside_recycling_total_recycled_tonnes);
 
-  // Need at least collected + recycled to compute score
-  const recoveryRate = safeDiv(recycled, collected); // 0..1
-  const riskScore = recoveryRate === null ? null : (1 - recoveryRate) * 100;
+
+  const recoveryRateRaw = safeDiv(recycled, collected); // 0..1
+  const riskScoreRaw = recoveryRateRaw === null ? null : (1 - recoveryRateRaw) * 100;
+  const recoveryRate = safeDiv(recycled, collected); // keep full precision
+  const riskScore = round2(recoveryRate === null ? null : (1 - recoveryRate) * 100);
+
 
   const recyclingPerCapita = (collected !== null && population) ? collected / population : null;
 

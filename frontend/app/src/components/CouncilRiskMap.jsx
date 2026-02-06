@@ -20,6 +20,61 @@ function riskToFill(risk) {
     return "#fed976";
 }
 
+function MapLegend() {
+    const items = [
+        { label: "≥ 35% (Very high)", color: "#b10026" },
+        { label: "25–34.99% (High)", color: "#e31a1c" },
+        { label: "15–24.99% (Moderate)", color: "#fd8d3c" },
+        { label: "< 15% (Low)", color: "#fed976" },
+        { label: "No data", color: "#dddddd" },
+    ];
+
+    return (
+        <div
+            style={{
+                position: "absolute",
+                right: 12,
+                bottom: 12,
+                zIndex: 1000,
+                background: "rgba(255,255,255,0.95)",
+                border: "1px solid #ddd",
+                borderRadius: 10,
+                padding: "10px 12px",
+                width: 220,
+                boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+            }}
+        >
+            <div style={{ fontWeight: 700, marginBottom: 6 }}>Legend</div>
+            <div style={{ fontSize: 12, color: "#555", marginBottom: 8 }}>
+                Risk bands (% collected but not recycled)
+            </div>
+
+            <div style={{ display: "grid", gap: 6 }}>
+                {items.map((it) => (
+                    <div
+                        key={it.label}
+                        style={{ display: "flex", alignItems: "center", gap: 8 }}
+                    >
+                        <span
+                            aria-hidden="true"
+                            style={{
+                                width: 14,
+                                height: 14,
+                                borderRadius: 4,
+                                background: it.color,
+                                border: "1px solid rgba(0,0,0,0.25)",
+                                flex: "0 0 auto",
+                            }}
+                        />
+                        <span style={{ fontSize: 13 }}>{it.label}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+
 export default function CouncilRiskMap({ ranking, selectedCouncil, onSelectCouncil }) {
     const [geo, setGeo] = useState(null);
     const [err, setErr] = useState("");
@@ -59,39 +114,45 @@ export default function CouncilRiskMap({ ranking, selectedCouncil, onSelectCounc
         <div style={{ border: "1px solid #ddd", padding: 8, marginBottom: 16 }}>
             <h2 style={{ marginTop: 0 }}>Risk Map (Victoria)</h2>
 
-            <MapContainer style={{ height: 420, width: "100%" }} center={[-37.0, 144.5]} zoom={6}>
-                <TileLayer
-                    attribution='&copy; OpenStreetMap contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
+            <div style={{ position: "relative" }}>
+                <MapContainer style={{ height: 420, width: "100%" }} center={[-37.0, 144.5]} zoom={6}>
 
-                <GeoJSON
-                    data={geo}
-                    style={(feature) => {
-                        const rawName = feature?.properties?.[nameProp];
-                        const risk = riskByCouncil.get(normCouncilName(rawName));
-                        const isSelected = normCouncilName(rawName) === selectedNorm;
+                    <TileLayer
+                        attribution='&copy; OpenStreetMap contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
 
-                        return {
-                            color: isSelected ? "#000000" : "#444444",
-                            weight: isSelected ? 3 : 1,
-                            fillColor: riskToFill(risk),
-                            fillOpacity: 0.6,
-                        };
-                    }}
-                    onEachFeature={(feature, layer) => {
-                        const rawName = feature?.properties?.[nameProp] ?? "Unknown";
-                        const risk = riskByCouncil.get(normCouncilName(rawName));
-                        layer.bindTooltip(`${rawName} — Risk: ${risk ?? "N/A"}%`);
+                    <GeoJSON
+                        data={geo}
+                        style={(feature) => {
+                            const rawName = feature?.properties?.[nameProp];
+                            const risk = riskByCouncil.get(normCouncilName(rawName));
+                            const isSelected = normCouncilName(rawName) === selectedNorm;
 
-                        layer.on("click", () => {
-                            const clickedNorm = normCouncilName(rawName);
-                            const match = (ranking || []).find((r) => normCouncilName(r.council) === clickedNorm);
-                            if (match) onSelectCouncil(match.council);
-                        });
-                    }}
-                />
-            </MapContainer>
+                            return {
+                                color: isSelected ? "#000000" : "#444444",
+                                weight: isSelected ? 3 : 1,
+                                fillColor: riskToFill(risk),
+                                fillOpacity: 0.6,
+                            };
+                        }}
+                        onEachFeature={(feature, layer) => {
+                            const rawName = feature?.properties?.[nameProp] ?? "Unknown";
+                            const risk = riskByCouncil.get(normCouncilName(rawName));
+                            const riskLabel = risk == null || Number.isNaN(risk) ? "N/A" : Number(risk).toFixed(2);
+                            layer.bindTooltip(`${rawName} — Risk: ${riskLabel}%`);
+
+
+                            layer.on("click", () => {
+                                const clickedNorm = normCouncilName(rawName);
+                                const match = (ranking || []).find((r) => normCouncilName(r.council) === clickedNorm);
+                                if (match) onSelectCouncil(match.council);
+                            });
+                        }}
+                    />
+                </MapContainer>
+                <MapLegend />
+            </div>
         </div>
     );
 }
