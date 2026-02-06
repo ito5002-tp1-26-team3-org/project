@@ -139,7 +139,6 @@ export default function Resident() {
     user?.profile?.email ||
     "Member";
 
-  // Soft gating: guides + partners are public; incentives/vouchers require Residents group
   const incentivesLocked = !isResidentUser;
 
   // ===== Demo stats (replace with real backend later) =====

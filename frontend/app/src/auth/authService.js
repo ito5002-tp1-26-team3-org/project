@@ -32,26 +32,26 @@ export async function logout() {
     // ignore
   }
 
-  const domain = import.meta.env.VITE_COGNITO_DOMAIN; // must include https://
+  const domain = import.meta.env.VITE_COGNITO_DOMAIN;
   const clientId = userManager.settings.client_id;
 
-  const logoutUri =
+  const postLogout =
     import.meta.env.VITE_POST_LOGOUT_REDIRECT_URI ||
     `${window.location.origin}/`;
 
   if (!domain || !clientId) {
-    console.error("Missing VITE_COGNITO_DOMAIN or client_id", { domain, clientId });
     window.location.assign("/");
     return;
   }
 
   const url =
     `${domain}/logout?client_id=${encodeURIComponent(clientId)}` +
-    `&logout_uri=${encodeURIComponent(logoutUri)}`;
+    `&redirect_uri=${encodeURIComponent(postLogout)}` +
+    `&logout_uri=${encodeURIComponent(postLogout)}`;
 
   window.location.assign(url);
-
 }
+
 
 
 export async function getUser() {

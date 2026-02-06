@@ -32,8 +32,8 @@ export default function Staff() {
       </div>
 
       <p className="muted" style={{ maxWidth: 560 }}>
-  Staff access is secured by AWS Cognito. Staff accounts require a <b>@victoria.ca</b> email to access the dashboard.
-</p>
+        Staff access is secured by AWS Cognito. Staff accounts require a <b>@victoria.ca</b> email to access the dashboard.
+      </p>
 
 
       {/* Signed out */}
