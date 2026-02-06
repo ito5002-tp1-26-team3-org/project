@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { isInGroup, logout } from "../auth/authService";
 
+
 function StatCard({ value, label, note, variant = "teal" }) {
   return (
     <div className={`panel statCard statCard-${variant}`}>
@@ -73,13 +74,14 @@ export default function Home() {
 
       {/* Hero */}
       <Section
-        title="Supporting responsible e-waste disposal across Victoria"
-        subtitle="A practical portal for residents and councils."
+        title="E-waste disposal and council reporting portal"
+        subtitle="A practical service for residents and local government staff."
       >
         <div className="hero stack">
-          <p className="muted" style={{ maxWidth: 900 }}>
-            Use the resident portal to find drop-off options and understand correct disposal. Council staff can use the
-            dashboard to view mapped indicators, monitor trends, and export data for reporting.
+          <p className="muted" style={{ maxWidth: 920 }}>
+            Use this portal to access disposal guidance and drop-off information, or (for authorised council staff) view
+            local indicators and export data for reporting. This service is designed to support safe handling and informed
+            decision-making.
           </p>
 
           <div className="trustRow">
@@ -89,34 +91,35 @@ export default function Home() {
           </div>
 
           <div className="heroActions">
-            <Link className="btnPrimary linkBtn" to="/resident">Open resident portal</Link>
-            <Link className="btnSecondary linkBtn" to="/staff">Open staff portal</Link>
-            
+            <Link className="btnPrimary linkBtn" to="/resident">Resident portal</Link>
+            <Link className="btnSecondary linkBtn" to="/staff">Council staff</Link>
 
             {!loading && user && isStaff ? (
-              <Link className="btnPrimary linkBtn" to="/dashboard">Go to dashboard</Link>
+              <Link className="btnPrimary linkBtn" to="/dashboard">Open dashboard</Link>
             ) : null}
             {!loading && user && isResident ? (
-              <Link className="btnPrimary linkBtn" to="/resident">Go to resident portal</Link>
+              <Link className="btnPrimary linkBtn" to="/resident">Open resident portal</Link>
             ) : null}
           </div>
 
           {!loading && user && !isStaff && !isResident ? (
-            <div className="panel panelAccentRose">
+            <div className="panel panelCallout panelCallout-warn">
               <b>Account not assigned</b>
               <div className="muted mt8">
-                Your account isn’t assigned to <b>Staff</b> or <b>Residents</b>. Ask an administrator to add you to a group.
+                Your account is signed in, but it is not assigned to <b>Staff</b> or <b>Residents</b>. Contact an administrator
+                to update your access.
               </div>
             </div>
           ) : null}
         </div>
       </Section>
 
+
       {/* Start / Journey */}
       <Section id="start" title="Start here" subtitle="Choose the pathway that matches your role.">
         <div className="gridFeature">
           <div className="panel panelAccentBlue stack">
-            <div className="statKicker">Residents</div>
+            <div className="statKicker">👨‍👩‍👧‍👦 Residents</div>
             <h3 className="noTopMargin">Find drop-off options and disposal guidance</h3>
             <div className="muted">
               Use the suburb finder, read disposal guides, and sign in to access incentives and vouchers.
@@ -128,7 +131,7 @@ export default function Home() {
           </div>
 
           <div className="panel panelAccentAmber stack">
-            <div className="statKicker">Council staff</div>
+            <div className="statKicker">👩🏻‍💼 Council staff</div>
             <h3 className="noTopMargin">Monitor risk indicators and export reports</h3>
             <div className="muted">
               View ranked LGAs, map risk categories, review trends over time, and download CSVs for reporting.
@@ -142,7 +145,7 @@ export default function Home() {
       </Section>
 
       {/* Keep stats restrained */}
-      <Section title="Key indicators" subtitle="High-level context only (expand below for details).">
+      <Section title="Key indicators" subtitle="">
         <div className="gridCardsWide">
           <StatCard variant="rose" value="500,000" label="Tonnes of e-waste annually (AU)" note="National context indicator." />
           <StatCard variant="blue" value="~50%" label="Estimated recycling rate (AU)" note="High-level indicator used in national reporting." />
@@ -187,7 +190,7 @@ export default function Home() {
         </div>
       </Section>
 
-      <Section id="method" title="Methodology" subtitle="How “risk” is calculated in the dashboard.">
+      <Section id="method" title="Definitions and methodology" subtitle="Dashboard indicators and how they are derived.">
         <div className="stack">
           <Disclosure
             title="Risk score definition"
@@ -213,7 +216,7 @@ export default function Home() {
             title="National data note"
             subtitle="Context indicators used in the home page."
           >
-            <div className="panel">
+            <div className="panel panelAccent">
               <h3 className="noTopMargin">Sources</h3>
               <p className="noTopMargin">
                 <b>Sources:</b> ABS Waste Account Australia (Experimental Estimates) and National Waste and Resource Recovery Report (DCCEEW).
