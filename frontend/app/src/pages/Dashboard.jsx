@@ -38,6 +38,90 @@ function downloadText(filename, text) {
   URL.revokeObjectURL(url);
 }
 
+function RiskExplainer({ yearStart, selectedYearRow }) {
+  const collected = selectedYearRow?.collected;
+  const recycled = selectedYearRow?.recycled;
+
+  const exampleOk =
+    typeof collected === "number" &&
+    typeof recycled === "number" &&
+    collected > 0;
+
+  const computedRisk = exampleOk ? ((collected - recycled) / collected) * 100 : null;
+
+  return (
+    <details className="panel panelAccentBlue" style={{ marginBottom: 12 }}>
+      <summary style={{ cursor: "pointer", listStyle: "none" }}>
+        <div className="rowBetween" style={{ alignItems: "center" }}>
+          <div>
+            <b>What does “Risk” mean?</b>
+            <div className="muted" style={{ marginTop: 4 }}>
+              Risk is a proxy for kerbside recycling quality (collected vs actually recycled).
+            </div>
+          </div>
+          <span className="muted" aria-hidden="true">▾</span>
+        </div>
+      </summary>
+
+      <div style={{ marginTop: 12 }}>
+        <p className="noTopMargin">
+          In this dashboard, <b>Risk</b> estimates the <b>percentage of collected kerbside recycling that was not successfully recycled</b>.
+        </p>
+
+        <div className="panel soft">
+          <b>Formula</b>
+          <div className="muted" style={{ marginTop: 6 }}>
+            <b>Risk (%)</b> ≈ <b>((Collected − Recycled) ÷ Collected) × 100</b>
+          </div>
+          <div className="muted" style={{ marginTop: 8 }}>
+            Collected = tonnes picked up from kerbside recycling.
+            <br />
+            Recycled = tonnes actually recycled after sorting/processing.
+          </div>
+        </div>
+
+        <div className="gridTwo" style={{ marginTop: 12 }}>
+          <div className="panel soft">
+            <b>How to interpret it</b>
+            <ul className="stack" style={{ marginTop: 8, marginBottom: 0 }}>
+              <li><b>Lower risk</b> → more collected material is successfully recycled.</li>
+              <li><b>Higher risk</b> → more material is rejected/lost (often contamination/misclassification).</li>
+              <li><b>Not a direct measure of e-waste</b> — it’s an indicator for where education/services may help.</li>
+            </ul>
+          </div>
+
+          <div className="panel soft">
+            <b>This council’s breakdown</b>
+            <div className="muted" style={{ marginTop: 8 }}>
+              {exampleOk ? (
+                <>
+                  <div><b>Collected:</b> {collected} tonnes</div>
+                  <div><b>Recycled:</b> {recycled} tonnes</div>
+                  <div><b>Not recycled:</b> {(collected - recycled).toFixed(2)} tonnes</div>
+                  <div style={{ marginTop: 8 }}>
+                    <b>Computed risk:</b> {computedRisk.toFixed(2)}%
+                  </div>
+                </>
+              ) : (
+                <>
+                  Select a council and year with available data to see the breakdown.
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="muted" style={{ marginTop: 10 }}>
+          Showing results for <b>{yearStart}</b>. Risk is intended for comparisons across councils and over time, not as a definitive
+          measure of illegal dumping or a specific waste type.
+        </div>
+      </div>
+    </details>
+  );
+}
+
+
+
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
 
@@ -210,9 +294,9 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <p className="muted">
-        <b>Risk score (proxy):</b> % of kerbside recycling that was collected but not recycled.
-      </p>
+      <RiskExplainer yearStart={yearStart ?? "the selected year"} selectedYearRow={selectedYearRow} />
+
+
 
       {!authLoading && user ? (
         <p className="muted" style={{ marginTop: -6 }}>
