@@ -36,21 +36,15 @@ export async function logout() {
   const clientId = userManager.settings.client_id;
 
   const postLogout =
-    import.meta.env.VITE_POST_LOGOUT_REDIRECT_URI ||
-    `${window.location.origin}/`;
-
-  if (!domain || !clientId) {
-    window.location.assign("/");
-    return;
-  }
+    import.meta.env.VITE_POST_LOGOUT_REDIRECT_URI || `${window.location.origin}/`;
 
   const url =
     `${domain}/logout?client_id=${encodeURIComponent(clientId)}` +
-    `&redirect_uri=${encodeURIComponent(postLogout)}` +
     `&logout_uri=${encodeURIComponent(postLogout)}`;
 
   window.location.assign(url);
 }
+
 
 
 
