@@ -1,74 +1,119 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-
-const DEMO_USER = "mindy";
-const DEMO_PASS = "ewaste123";
+import { Link } from "react-router-dom";
+import { useAuth } from "../auth/AuthProvider";
+import { isInGroup, loginWithHint, logout, signupWithHint } from "../auth/authService";
 
 export default function Staff() {
-  const navigate = useNavigate();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [err, setErr] = useState("");
+  const { user, loading } = useAuth();
 
-  function login(e) {
-    e.preventDefault();
-    setErr("");
+  const authed = !!user;
+  const isStaff = authed && isInGroup(user, "Staff");
+  const isResident = authed && isInGroup(user, "Residents");
 
-    if (username.trim().toLowerCase() === DEMO_USER && password === DEMO_PASS) {
-      localStorage.setItem("council_authed", "true");
-      localStorage.setItem("council_user", "Mindy Zhang");
-      navigate("/dashboard");
-      return;
-    }
-    setErr("Invalid demo credentials. Try mindy / ewaste123");
-  }
+  const displayName =
+    user?.profile?.name ||
+    user?.profile?.given_name ||
+    user?.profile?.email ||
+    "User";
 
   return (
     <div className="container stack centerPage">
       <div className="loginHeader">
         <span className="pageIcon staff" aria-hidden="true">🏛️</span>
-        <h1 className="noTopMargin">Council Staff Login</h1>
-        <Link className="btnSecondary linkBtn" to="/">Home</Link>
+        <h1 className="noTopMargin">Council Staff Portal</h1>
+        <div className="row wrap" style={{ gap: 8 }}>
+          <Link className="btnSecondary linkBtn" to="/">Home</Link>
+
+          {!loading && authed ? (
+            <button className="btnSecondary" type="button" onClick={() => logout()}>
+              Logout
+            </button>
+          ) : null}
+        </div>
       </div>
 
-      <p className="muted" style={{ maxWidth: 520 }}>
-        Iteration 1 uses demo login. (Cognito planned for Iteration 2+)
-      </p>
+      <p className="muted" style={{ maxWidth: 560 }}>
+  Staff access is secured by AWS Cognito. Staff accounts require a <b>@victoria.ca</b> email to access the dashboard.
+</p>
 
-      <div className="card">
-        <form onSubmit={login} className="formGrid">
-          <label className="field">
-            <span className="label">Username</span>
-            <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="input"
-              placeholder="mindy"
-              autoComplete="username"
-            />
-          </label>
 
-          <label className="field">
-            <span className="label">Password</span>
-            <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              type="password"
-              className="input"
-              placeholder="ewaste123"
-              autoComplete="current-password"
-            />
-          </label>
+      {/* Signed out */}
+      {!loading && !authed ? (
+        <div className="card stack" style={{ maxWidth: 560 }}>
+          <h2 className="noTopMargin">Staff Sign In</h2>
+          <div className="muted">
+            You will be redirected to the secure Cognito sign-in page.
+          </div>
 
-          <button type="submit" className="btn">Login</button>
+          <div className="row wrap" style={{ gap: 10 }}>
+            <button
+              type="button"
+              className="btnPrimary"
+              onClick={() => loginWithHint("staff")}
+            >
+              Sign in as Staff
+            </button>
 
-          {err && <div className="error">{err}</div>}
-        </form>
-      </div>
+            <button
+              type="button"
+              className="btnSecondary"
+              onClick={() => signupWithHint("staff")}
+              title="Create a staff account (victoria.ca emails only)"
+            >
+              Create Staff account
+            </button>
 
-      <div className="muted">
-        Demo credentials: <b>mindy</b> / <b>ewaste123</b>
-      </div>
+            <Link className="btnSecondary linkBtn" to="/resident">
+              I’m a Resident
+            </Link>
+          </div>
+
+
+          <div className="muted" style={{ marginTop: 8 }}>
+            Staff accounts are determined by email domain. Use a <b>@victoria.ca</b> email when signing up.
+            After you verify your email, Cognito will automatically assign you to the <b>Staff</b> group.
+          </div>
+
+        </div>
+      ) : null}
+
+      {/* Signed in as Staff */}
+      {!loading && authed && isStaff ? (
+        <div className="card stack" style={{ maxWidth: 560 }}>
+          <h2 className="noTopMargin">Welcome, {displayName}</h2>
+          <div className="muted">
+            Your account is authorized for staff access.
+          </div>
+
+          <div className="row wrap" style={{ gap: 10 }}>
+            <Link className="btnPrimary linkBtn" to="/dashboard">
+              Go to Dashboard
+            </Link>
+            <button className="btnSecondary" type="button" onClick={() => logout()}>
+              Logout
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Signed in but NOT Staff */}
+      {!loading && authed && !isStaff ? (
+        <div className="panel" style={{ maxWidth: 560, borderLeft: "4px solid #dc2626" }}>
+          <b>Access denied</b>
+          <div className="muted" style={{ marginTop: 6 }}>
+            You are signed in as <b>{displayName}</b>, but your account is not in the <b>Staff</b> group.
+            {isResident ? " It looks like you may be a Resident account." : ""}
+          </div>
+
+          <div className="row wrap mt12" style={{ gap: 10 }}>
+            <Link className="btnSecondary linkBtn" to="/resident">
+              Go to Resident Portal
+            </Link>
+            <button className="btnPrimary" type="button" onClick={() => logout()}>
+              Logout and switch account
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

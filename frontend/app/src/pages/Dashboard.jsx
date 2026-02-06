@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import CouncilRiskMap from "../components/CouncilRiskMap";
+
+import { useAuth } from "../auth/AuthProvider";
+import { logout as cognitoLogout, getGroupsFromUser } from "../auth/authService";
 
 function pct(x) {
   if (x === null || x === undefined || Number.isNaN(x)) return "N/A";
@@ -36,12 +39,16 @@ function downloadText(filename, text) {
 }
 
 export default function Dashboard() {
-  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
 
-  useEffect(() => {
-    const ok = localStorage.getItem("council_authed") === "true";
-    if (!ok) navigate("/staff");
-  }, [navigate]);
+  const displayName =
+    user?.profile?.name ||
+    user?.profile?.given_name ||
+    user?.profile?.email ||
+    "Staff";
+
+  const email = user?.profile?.email || "";
+  const groups = user ? getGroupsFromUser(user) : [];
 
   const [data, setData] = useState(null);
   const [err, setErr] = useState("");
@@ -184,31 +191,35 @@ export default function Dashboard() {
     downloadText(`vic_${safeCouncil}_trend.csv`, csv);
   }
 
-  function logout() {
-    localStorage.removeItem("council_authed");
-    localStorage.removeItem("council_user");
-    navigate("/");
-  }
-
   const selectedYearRow = ranking.find((r) => r.council === selectedCouncil);
 
   return (
     <div className="container stack">
-
-
       <div className="rowBetween">
         <span className="pageIcon resident" aria-hidden="true">📊</span>
         <h1 className="noTopMargin">Council Dashboard</h1>
         <div className="pageTopNav">
           <Link className="btnSecondary linkBtn" to="/">Home</Link>
-          <button onClick={logout} className="btnPrimary">Logout</button>
+          <button
+            onClick={() => cognitoLogout()}
+            className="btnPrimary"
+            disabled={authLoading}
+          >
+            Logout
+          </button>
         </div>
-        
       </div>
-    
+
       <p className="muted">
         <b>Risk score (proxy):</b> % of kerbside recycling that was collected but not recycled.
       </p>
+
+      {!authLoading && user ? (
+        <p className="muted" style={{ marginTop: -6 }}>
+          Signed in as <b>{displayName}</b>{email ? <> (<b>{email}</b>)</> : null}
+          {groups.length ? <> • Groups: <b>{groups.join(", ")}</b></> : null}
+        </p>
+      ) : null}
 
       {loading && <p>Loading council dataset…</p>}
       {err && <p style={{ color: "crimson" }}>{err}</p>}
@@ -402,7 +413,7 @@ export default function Dashboard() {
                 </div>
               )}
 
-              <p className="muted">Iteration 2: add visual graph charts</p>
+              <p className="muted">Iteration 2</p>
             </div>
           )}
         </>

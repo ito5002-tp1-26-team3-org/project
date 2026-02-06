@@ -1,4 +1,7 @@
 import { Link } from "react-router-dom";
+import { useAuth } from "../auth/AuthProvider";
+import { isInGroup } from "../auth/authService";
+import { logout } from "../auth/authService";
 
 function StatCard({ value, label, note, variant = "teal" }) {
   return (
@@ -23,16 +26,26 @@ function Section({ title, subtitle, children, id }) {
 }
 
 export default function Home() {
+  const { user, loading } = useAuth();
+
+  const isStaff = !!user && isInGroup(user, "Staff");
+  const isResident = !!user && isInGroup(user, "Residents");
+
   return (
     <div className="container stack">
       <div className="rowBetween">
         <span className="pageIcon resident" aria-hidden="true">♻️</span>
         <h1 className="noTopMargin">E-Waste Manager</h1>
+
         <div className="pageTopNav">
+          {!loading && user ? (
+            <button className="btnSecondary linkBtn" onClick={() => logout()}>
+              Logout
+            </button>
+          ) : null}
         </div>
       </div>
 
-    
       <Section
         title="Sustainable E-Waste Management"
         subtitle="Building a Greener Future Through Smart Recycling"
@@ -44,16 +57,35 @@ export default function Home() {
           </p>
 
           <div className="row wrap">
+            {/* Portal entry points */}
             <Link className="btnPrimary linkBtn" to="/resident">For Residents</Link>
-            <Link className="btnSecondary linkBtn" to="/dashboard">For Staff</Link>
+            <Link className="btnSecondary linkBtn" to="/staff">For Staff</Link>
             <a className="btnSecondary linkBtn" href="#learn-more">Learn More</a>
+
+            {/* Helpful “continue” buttons if already signed in */}
+            {!loading && user && isStaff ? (
+              <Link className="btnPrimary linkBtn" to="/dashboard">Go to Dashboard</Link>
+            ) : null}
+
+            {!loading && user && isResident ? (
+              <Link className="btnPrimary linkBtn" to="/resident">Go to Resident Portal</Link>
+            ) : null}
           </div>
+
+          {!loading && user && !isStaff && !isResident ? (
+            <div className="panel" style={{ marginTop: 12 }}>
+              <b>Signed in</b>
+              <div className="muted">
+                Your account isn’t assigned to Staff or Residents yet. Ask an admin to add you to a group.
+              </div>
+            </div>
+          ) : null}
         </div>
       </Section>
 
       <Section title="Our Impact" subtitle="Real-time statistics across our LGA">
         <div className="gridCards">
-          <StatCard variant= "rose" value="95,420" label="Items Recycled This Year" />
+          <StatCard variant="rose" value="95,420" label="Items Recycled This Year" />
           <StatCard variant="blue" value="12,450" label="Active Participants" />
           <StatCard variant="purple" value="20" label="Drop-off Points" />
           <StatCard variant="amber" value="85%" label="Proper Classification Rate" />
@@ -114,15 +146,9 @@ export default function Home() {
 
       <Section id="learn-more" title="How It Works" subtitle="Simple steps to make a big difference">
         <ul className="stack">
-          <li>
-            <b>1️⃣ Register & Learn</b> — Access guides on how to properly sort and dispose of different types of e-waste.
-          </li>
-          <li>
-            <b>2️⃣ Recycle & Track</b> — Drop off e-waste at collection points and track your impact.
-          </li>
-          <li>
-            <b>3️⃣ Earn Rewards</b> — Get $0.10 credit per item recycled, redeem vouchers, and access partner deals.
-          </li>
+          <li><b>1️⃣ Register & Learn</b> — Access guides on how to properly sort and dispose of different types of e-waste.</li>
+          <li><b>2️⃣ Recycle & Track</b> — Drop off e-waste at collection points and track your impact.</li>
+          <li><b>3️⃣ Earn Rewards</b> — Get $0.10 credit per item recycled, redeem vouchers, and access partner deals.</li>
         </ul>
       </Section>
 
@@ -185,7 +211,7 @@ export default function Home() {
             <ul className="stack">
               <li><a href="#learn-more">How It Works</a></li>
               <li><Link to="/resident">Collection Points</Link></li>
-              <li><Link to="/dashboard">Council Dashboard</Link></li>
+              <li><Link to="/staff">Council Dashboard</Link></li>
             </ul>
           </div>
 
