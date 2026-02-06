@@ -120,8 +120,6 @@ function RiskExplainer({ yearStart, selectedYearRow }) {
   );
 }
 
-
-
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
 
@@ -142,6 +140,9 @@ export default function Dashboard() {
   const [riskThreshold, setRiskThreshold] = useState(20);
   const [selectedCouncil, setSelectedCouncil] = useState("");
   const [activeTab, setActiveTab] = useState("ranking");
+
+  const [csvPromptOpen, setCsvPromptOpen] = useState(false);
+  const [csvPromptCouncil, setCsvPromptCouncil] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -246,6 +247,12 @@ export default function Dashboard() {
     downloadText(`vic_risk_ranking_${yearStart}.csv`, csv);
   }
 
+  function promptDownloadCouncilCSV(councilName) {
+    setCsvPromptCouncil(councilName);
+    setCsvPromptOpen(true);
+  }
+
+
   function downloadTrendCSV() {
     if (!trend.length || !selectedCouncil) return;
 
@@ -275,6 +282,53 @@ export default function Dashboard() {
     downloadText(`vic_${safeCouncil}_trend.csv`, csv);
   }
 
+  function confirmDownloadCouncilCSV() {
+    if (csvPromptCouncil) {
+      setSelectedCouncil(csvPromptCouncil);
+      // downloadTrendCSV uses selectedCouncil + trend;
+      // we need to download based on the council they clicked.
+      // generate CSV from the council's series directly.
+      const series = data?.timeseriesByCouncil?.[csvPromptCouncil] || [];
+      if (!series.length) {
+        setCsvPromptOpen(false);
+        return;
+      }
+
+      const sorted = series.slice().sort((a, b) => (a.year_start ?? 0) - (b.year_start ?? 0));
+
+      const rows = sorted.map((t) => ({
+        council: csvPromptCouncil,
+        financial_year: t.financial_year,
+        year_start: t.year_start ?? "",
+        risk_percent: t.risk_score ?? "",
+        recovery_percent: t.recovery_rate != null ? (t.recovery_rate * 100).toFixed(2) : "",
+        collected_tonnes: t.recycling_collected_tonnes ?? "",
+        recycled_tonnes: t.recycling_recycled_tonnes ?? "",
+        population: t.population ?? "",
+      }));
+
+      const csv = toCSV(rows, [
+        { key: "council", label: "Council" },
+        { key: "financial_year", label: "Financial Year" },
+        { key: "year_start", label: "Year Start" },
+        { key: "risk_percent", label: "Risk Score (%)" },
+        { key: "recovery_percent", label: "Recovery Rate (%)" },
+        { key: "collected_tonnes", label: "Recycling Collected (tonnes)" },
+        { key: "recycled_tonnes", label: "Recycling Recycled (tonnes)" },
+        { key: "population", label: "Population" },
+      ]);
+
+      const safeCouncil = csvPromptCouncil.replace(/[^a-z0-9]+/gi, "_");
+      downloadText(`vic_${safeCouncil}_trend.csv`, csv);
+    }
+
+    setCsvPromptOpen(false);
+  }
+
+  function cancelDownloadCouncilCSV() {
+    setCsvPromptOpen(false);
+  }
+
   const selectedYearRow = ranking.find((r) => r.council === selectedCouncil);
 
   return (
@@ -295,8 +349,6 @@ export default function Dashboard() {
       </div>
 
       <RiskExplainer yearStart={yearStart ?? "the selected year"} selectedYearRow={selectedYearRow} />
-
-
 
       {!authLoading && user ? (
         <p className="muted" style={{ marginTop: -6 }}>
@@ -386,9 +438,16 @@ export default function Dashboard() {
                 <ul className="mt8">
                   {aboveThreshold.slice(0, 10).map((r) => (
                     <li key={r.council}>
-                      <button onClick={() => setSelectedCouncil(r.council)} className="btnTiny">
+                      <button
+                        onClick={() => {
+                          setSelectedCouncil(r.council);
+                          promptDownloadCouncilCSV(r.council);
+                        }}
+                        className="btnTiny"
+                      >
                         View
                       </button>
+
                       &nbsp;{r.council} — <b>{r.risk_score?.toFixed(2) ?? "N/A"}%</b>
                     </li>
                   ))}
@@ -502,6 +561,44 @@ export default function Dashboard() {
           )}
         </>
       )}
+      {csvPromptOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.35)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+            zIndex: 9999,
+          }}
+          onClick={cancelDownloadCouncilCSV}
+        >
+          <div
+            className="panel"
+            style={{ width: "min(520px, 100%)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="noTopMargin">Download council CSV?</h3>
+            <div className="muted">
+              Download the trend CSV for <b>{csvPromptCouncil}</b>?
+            </div>
+
+            <div className="row wrap mt12" style={{ gap: 10 }}>
+              <button className="btnPrimary" type="button" onClick={confirmDownloadCouncilCSV}>
+                Yes, download
+              </button>
+              <button className="btnSecondary" type="button" onClick={cancelDownloadCouncilCSV}>
+                No thanks
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
