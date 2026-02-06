@@ -392,11 +392,29 @@ export default function Resident() {
         </div>
       ) : null}
 
-      <div className="gridStats">
-        <StatBox title="Items Recycled" value={lifetimeItems} subtitle="Lifetime total" />
-        <StatBox title="Total Earned" value={`$${availableCredit.toFixed(2)}`} subtitle="Available credit" />
-        <StatBox title="Member Rank" value={memberRank} subtitle="Progress to Gold" rightNote={rankProgress} />
-      </div>
+      {isResidentUser ? (
+        <div className="gridStats">
+          <StatBox title="Items Recycled" value={lifetimeItems} subtitle="Lifetime total" />
+          <StatBox title="Total Earned" value={`$${availableCredit.toFixed(2)}`} subtitle="Available credit" />
+          <StatBox title="Member Rank" value={memberRank} subtitle="Progress to Gold" rightNote={rankProgress} />
+        </div>
+      ) : (
+        <div className="panel">
+          <b>Sign in to see your stats</b>
+          <div className="muted" style={{ marginTop: 6 }}>
+            Your recycling totals, credits, and rank are linked to your account.
+          </div>
+          <div className="row wrap mt12" style={{ gap: 10 }}>
+            <button className="btnPrimary" type="button" onClick={() => loginWithHint("resident")}>
+              Sign in
+            </button>
+            <button className="btnSecondary" type="button" onClick={() => signupWithHint("resident")}>
+              Create account
+            </button>
+          </div>
+        </div>
+      )}
+
 
       <div className="tabs" role="tablist" aria-label="Resident features">
         <TabButton id="guides" activeTab={activeTab} setActiveTab={setActiveTab}>Disposal Guides</TabButton>
