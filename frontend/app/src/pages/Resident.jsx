@@ -85,7 +85,7 @@ function TxRow({ item, location, amount, date }) {
   );
 }
 
-function PartnerCard({ name, deal, address, phone }) {
+function PartnerCard({ name, deal, address, phone, url }) {
   return (
     <div className="panel partnerCard">
       <div className="rowBetween">
@@ -93,13 +93,29 @@ function PartnerCard({ name, deal, address, phone }) {
           <div className="partnerName"><b>{name}</b></div>
           <div className="badge">{deal}</div>
         </div>
-        <button className="btnSecondary" type="button">Visit</button>
+
+        {url ? (
+          <a
+            className="btnSecondary linkBtn"
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Visit
+          </a>
+        ) : (
+          <button className="btnSecondary" type="button" disabled>
+            Visit
+          </button>
+        )}
       </div>
+
       <div className="muted mt8">{address}</div>
       <div className="muted">{phone}</div>
     </div>
   );
 }
+
 
 function VoucherCard({ title, desc, points, onRedeem, disabled }) {
   return (
@@ -266,10 +282,43 @@ export default function Resident() {
   ];
 
   const partners = [
-    { name: "GreenTech Recyclers", deal: "$5 off next drop-off", address: "123 Main St, Central", phone: "(555) 0100" },
-    { name: "Battery Solutions Co", deal: "Free collection for bulk", address: "456 Oak Ave, Eastwood", phone: "(555) 0200" },
-    { name: "ComputerCycle", deal: "10% bonus credit on laptops", address: "789 Tech Blvd, Westside", phone: "(555) 0300" },
+    {
+      name: "TechCollect (free e-waste drop-off)",
+      deal: "Find your nearest drop-off site",
+      address: "Australia-wide partner program (councils & sites)",
+      phone: "1300 229 837",
+      url: "https://techcollect.com.au/our-locations/",
+    },
+    {
+      name: "MobileMuster (phones & accessories)",
+      deal: "Free drop-off + free post-back options",
+      address: "Mobile phones, chargers, accessories",
+      phone: "See website",
+      url: "https://www.mobilemuster.com.au/recycle-a-mobile/",
+    },
+    {
+      name: "Ecycle Solutions (TVs, computers, printers)",
+      deal: "Find a nearby e-waste drop-off location",
+      address: "National network of drop-off sites",
+      phone: "See website",
+      url: "https://ecyclesolutions.net.au/drop-off-locations/",
+    },
+    {
+      name: "RecyclingNearYou (directory)",
+      deal: "Search by suburb/postcode for e-waste options",
+      address: "Run by Planet Ark – location directory",
+      phone: "See website",
+      url: "https://recyclingnearyou.com.au/",
+    },
+    {
+      name: "Sustainability Victoria (official guidance)",
+      deal: "How/where to recycle e-waste in Victoria",
+      address: "State guidance + links to drop-off programs",
+      phone: "See website",
+      url: "https://www.sustainability.vic.gov.au/recycling-and-reducing-waste-at-home/recycling-at-home/e-waste",
+    },
   ];
+
 
   const voucherOptions = [
     { title: "$10 Council Services Voucher", desc: "Redeem for council services", points: 100 },
@@ -532,6 +581,10 @@ export default function Resident() {
               <PartnerCard key={p.name} {...p} />
             ))}
           </div>
+          <div className="muted" style={{ marginTop: 8 }}>
+            Links open official program pages / location finders. Availability varies by suburb and item type—check the provider page for accepted items and hours.
+          </div>
+
         </div>
       )}
 
