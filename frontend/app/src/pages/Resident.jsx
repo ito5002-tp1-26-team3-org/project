@@ -333,10 +333,14 @@ export default function Resident() {
   return (
     <div className="container stack">
       <div className="rowBetween">
-        <span className="pageIcon resident" aria-hidden="true">🏠</span>
-        <h1 className="noTopMargin">Resident Portal</h1>
+        <div className="titleRow">
+          <span className="pageIcon resident" aria-hidden="true">🏠</span>
+          <h1 className="noTopMargin">Resident Portal</h1>
+        </div>
+
         <div className="pageTopNav">
           <Link className="btnSecondary linkBtn" to="/">Home</Link>
+
 
           {!authLoading && !authed ? (
             <>
@@ -540,7 +544,7 @@ export default function Resident() {
             </div>
 
             <div className="muted">
-              Iteration 2: add certified wiping services directory + printable checklist.
+              Iteration 2
             </div>
           </div>
         </div>
