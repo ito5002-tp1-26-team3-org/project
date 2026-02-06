@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
+import { useAuth } from "../auth/AuthProvider";
+import { isInGroup, loginWithHint, logout, signupWithHint } from "../auth/authService";
+
 function mapsLink(address, suburb) {
   const q = encodeURIComponent([address, suburb].filter(Boolean).join(", "));
   return `https://www.google.com/maps/search/?api=1&query=${q}`;
@@ -123,6 +126,23 @@ function VoucherCard({ title, desc, points, onRedeem, disabled }) {
 }
 
 export default function Resident() {
+  // ===== Cognito auth state =====
+  const { user, loading: authLoading } = useAuth();
+  const authed = !!user;
+
+  const isResidentUser = authed && isInGroup(user, "Residents");
+  const isStaffUser = authed && isInGroup(user, "Staff");
+
+  const displayName =
+    user?.profile?.name ||
+    user?.profile?.given_name ||
+    user?.profile?.email ||
+    "Member";
+
+  // Soft gating: guides + partners are public; incentives/vouchers require Residents group
+  const incentivesLocked = !isResidentUser;
+
+  // ===== Demo stats (replace with real backend later) =====
   const lifetimeItems = 46;
   const availableCredit = 45.80;
   const memberRank = "Silver";
@@ -130,6 +150,7 @@ export default function Resident() {
   const points = 458;
 
   const [activeTab, setActiveTab] = useState("guides");
+
 
   const [facilities, setFacilities] = useState([]);
   const [suburbInput, setSuburbInput] = useState("");
@@ -157,7 +178,6 @@ export default function Resident() {
     return () => { cancelled = true; };
   }, []);
 
-  // ✅ Autocomplete suburb list (unique + sorted)
   const suburbOptions = useMemo(() => {
     const set = new Set();
     for (const f of facilities) {
@@ -265,12 +285,64 @@ export default function Resident() {
   return (
     <div className="container stack">
       <div className="rowBetween">
-        <span className="pageIcon resident" aria-hidden="true">🏛️</span>
+        <span className="pageIcon resident" aria-hidden="true">🏠</span>
         <h1 className="noTopMargin">Resident Portal</h1>
         <div className="pageTopNav">
           <Link className="btnSecondary linkBtn" to="/">Home</Link>
+
+          {!authLoading && !authed ? (
+            <>
+              <button
+                className="btnPrimary"
+                type="button"
+                onClick={() => loginWithHint("resident")}
+                title="Sign in with a Resident account"
+              >
+                Resident Sign In
+              </button>
+
+              <button
+                className="btnSecondary"
+                type="button"
+                onClick={() => signupWithHint("resident")}
+                title="Create a Resident account"
+              >
+                Create account
+              </button>
+            </>
+          ) : null}
+
+
+          {!authLoading && authed ? (
+            <button className="btnSecondary" type="button" onClick={() => logout()}>
+              Logout
+            </button>
+          ) : null}
         </div>
       </div>
+
+      {!authLoading && authed ? (
+        <div className="muted" style={{ marginTop: -8 }}>
+          Signed in as <b>{displayName}</b>
+          {isResidentUser ? <> • <b>Resident</b></> : null}
+          {isStaffUser && !isResidentUser ? <> • <b>Staff</b></> : null}
+        </div>
+      ) : null}
+
+      {!authLoading && authed && isStaffUser && !isResidentUser ? (
+        <div className="panel" style={{ borderLeft: "4px solid #d97706" }}>
+          <b>Signed in as staff</b>
+          <div className="muted">
+            Your account is in the Staff group. Resident rewards features are disabled for this session.
+          </div>
+          <div className="row wrap mt12">
+            <Link className="btnPrimary linkBtn" to="/dashboard">Go to Dashboard</Link>
+            <button className="btnSecondary" type="button" onClick={() => logout()}>
+              Logout and switch account
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <div className="gridStats">
         <StatBox title="Items Recycled" value={lifetimeItems} subtitle="Lifetime total" />
@@ -280,9 +352,13 @@ export default function Resident() {
 
       <div className="tabs" role="tablist" aria-label="Resident features">
         <TabButton id="guides" activeTab={activeTab} setActiveTab={setActiveTab}>Disposal Guides</TabButton>
-        <TabButton id="incentives" activeTab={activeTab} setActiveTab={setActiveTab}>My Incentives</TabButton>
+        <TabButton id="incentives" activeTab={activeTab} setActiveTab={setActiveTab}>
+          My Incentives {incentivesLocked ? "🔒" : ""}
+        </TabButton>
         <TabButton id="partners" activeTab={activeTab} setActiveTab={setActiveTab}>Partners & Deals</TabButton>
-        <TabButton id="vouchers" activeTab={activeTab} setActiveTab={setActiveTab}>Vouchers</TabButton>
+        <TabButton id="vouchers" activeTab={activeTab} setActiveTab={setActiveTab}>
+          Vouchers {incentivesLocked ? "🔒" : ""}
+        </TabButton>
       </div>
 
       {activeTab === "guides" && (
@@ -405,26 +481,44 @@ export default function Resident() {
       )}
 
       {activeTab === "incentives" && (
-        <div className="stack">
-          <div className="stack">
-            <h2 className="noTopMargin">My Recycling Incentives</h2>
-            <div className="muted">Earn $2.00 credit for each item recycled properly</div>
-          </div>
-
+        incentivesLocked ? (
           <div className="panel">
-            <div className="muted">Available Balance</div>
-            <div className="moneyBig">${availableCredit.toFixed(2)}</div>
-          </div>
+            <h2 className="noTopMargin">My Recycling Incentives</h2>
+            <div className="muted">
+              Sign in with a Resident account to view your balance and transactions.
+            </div>
+            <div className="row wrap mt12">
+              <button className="btnPrimary" type="button" onClick={() => loginWithHint("resident")}>
+                Sign in
+              </button>
+              <button className="btnSecondary" type="button" onClick={() => signupWithHint("resident")}>
+                Create account
+              </button>
+            </div>
 
+          </div>
+        ) : (
           <div className="stack">
-            <h3 className="noTopMargin">Recent Transactions</h3>
-            <div className="gridTx">
-              {transactions.map((t) => (
-                <TxRow key={`${t.item}-${t.date}`} {...t} />
-              ))}
+            <div className="stack">
+              <h2 className="noTopMargin">My Recycling Incentives</h2>
+              <div className="muted">Welcome, {displayName}. Earn $2.00 credit for each item recycled properly</div>
+            </div>
+
+            <div className="panel">
+              <div className="muted">Available Balance</div>
+              <div className="moneyBig">${availableCredit.toFixed(2)}</div>
+            </div>
+
+            <div className="stack">
+              <h3 className="noTopMargin">Recent Transactions</h3>
+              <div className="gridTx">
+                {transactions.map((t) => (
+                  <TxRow key={`${t.item}-${t.date}`} {...t} />
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )
       )}
 
       {activeTab === "partners" && (
@@ -443,36 +537,54 @@ export default function Resident() {
       )}
 
       {activeTab === "vouchers" && (
-        <div className="stack">
-          <div className="stack">
+        incentivesLocked ? (
+          <div className="panel">
             <h2 className="noTopMargin">Council Discounts & Vouchers</h2>
-            <div className="muted">Redeem your recycling credits for council services and local discounts</div>
-          </div>
-
-          <div className="panel rowBetween wrap">
-            <div>
-              <div className="muted">Available Points</div>
-              <div className="moneyBig">{points}</div>
+            <div className="muted">
+              Sign in with a Resident account to redeem vouchers.
             </div>
-            <div className="muted" style={{ textAlign: "right" }}>
-              <div>1 point = $2.00 earned</div>
-              <div>= ${(points * 2.00).toFixed(2)} value</div>
+            <div className="row wrap mt12">
+              <button className="btnPrimary" type="button" onClick={() => loginWithHint("resident")}>
+                Sign in
+              </button>
+              <button className="btnSecondary" type="button" onClick={() => signupWithHint("resident")}>
+                Create account
+              </button>
+            </div>
+
+          </div>
+        ) : (
+          <div className="stack">
+            <div className="stack">
+              <h2 className="noTopMargin">Council Discounts & Vouchers</h2>
+              <div className="muted">Redeem your recycling credits for council services and local discounts</div>
+            </div>
+
+            <div className="panel rowBetween wrap">
+              <div>
+                <div className="muted">Available Points</div>
+                <div className="moneyBig">{points}</div>
+              </div>
+              <div className="muted" style={{ textAlign: "right" }}>
+                <div>1 point = $2.00 earned</div>
+                <div>= ${(points * 2.00).toFixed(2)} value</div>
+              </div>
+            </div>
+
+            <div className="gridVouchers">
+              {voucherOptions.map((v) => (
+                <VoucherCard
+                  key={v.title}
+                  title={v.title}
+                  desc={v.desc}
+                  points={v.points}
+                  disabled={points < v.points}
+                  onRedeem={() => redeemVoucher(v)}
+                />
+              ))}
             </div>
           </div>
-
-          <div className="gridVouchers">
-            {voucherOptions.map((v) => (
-              <VoucherCard
-                key={v.title}
-                title={v.title}
-                desc={v.desc}
-                points={v.points}
-                disabled={points < v.points}
-                onRedeem={() => redeemVoucher(v)}
-              />
-            ))}
-          </div>
-        </div>
+        )
       )}
     </div>
   );
