@@ -141,7 +141,7 @@ function RiskExplainer({ yearStart, selectedYearRow }) {
     <details className="panel detailsCard" open={false}>
       <summary className="detailsSummary">
         <div>
-          <div className="detailsTitle">What does “Risk” mean?</div>
+          <div className="detailsTitle">❓What does “Risk” mean?</div>
           <div className="muted">
             A proxy indicator: collected recycling vs successfully recycled output.
           </div>
@@ -171,7 +171,7 @@ function RiskExplainer({ yearStart, selectedYearRow }) {
             <ul className="stack mt8" style={{ marginBottom: 0 }}>
               <li><b>Lower</b> → more collected material is successfully recycled.</li>
               <li><b>Higher</b> → more material is rejected/lost (often contamination/misclassification).</li>
-              <li><b>Indicator only</b> — not a direct measure of illegal dumping or e-waste disposal.</li>
+              <li><b>Indicator only</b> - not a direct measure of illegal dumping or e-waste disposal.</li>
             </ul>
           </div>
 
@@ -184,7 +184,7 @@ function RiskExplainer({ yearStart, selectedYearRow }) {
                   <div><b>Recycled:</b> {recycled} tonnes</div>
                   <div><b>Not recycled:</b> {(collected - recycled).toFixed(2)} tonnes</div>
                   <div className="mt8">
-                    <b>Computed risk:</b> {computedRisk.toFixed(2)}%
+                    <b>⚠️Computed risk:</b> {computedRisk.toFixed(2)}%
                   </div>
                 </>
               ) : (
@@ -430,7 +430,7 @@ export default function Dashboard() {
             <div className="panel soft">
               <div className="muted">
                 Signed in as <b>{displayName}</b>{email ? <> (<b>{email}</b>)</> : null}
-                {groups.length ? <> • <b>{groups.join(", ")}</b></> : null}
+                {groups.length ? <> • <b>{groups.join(", ")} 🧑‍💼</b></> : null}
               </div>
             </div>
           ) : null}
@@ -737,7 +737,6 @@ export default function Dashboard() {
                     </div>
                   )}
 
-                  <p className="muted">Iteration 2</p>
                 </div>
               )}
             </Section>
@@ -790,7 +789,7 @@ export default function Dashboard() {
               ?.scrollIntoView({ behavior: "smooth", block: "start" })
           }
         >
-          <span className="scrollCueText">Filter</span>
+          <span className="scrollCueText">🔍 Filter</span>
           <span className="scrollCueIcon" aria-hidden="true">↓</span>
         </button>
       </main>

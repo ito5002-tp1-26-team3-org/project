@@ -613,6 +613,8 @@ select:focus-visible {
   gap: 12px;
   background: rgba(0, 0, 0, .02);
   border-bottom: 1px solid var(--border);
+  border-color: #0f766d78;
+  
 }
 
 .detailsSummary::-webkit-details-marker {
@@ -629,7 +631,7 @@ select:focus-visible {
 
 /* Chevron (shared with guide cards) */
 .chev {
-  opacity: .7;
+  opacity: .9;
   transition: transform .15s ease;
 }
 
@@ -1394,6 +1396,7 @@ details[open] .chev {
   border: 1px solid var(--border);
   background: rgba(255,255,255,.75);
   box-shadow: var(--shadow-sm);
+  font-size: large;
 }
 
 .roleIconResident{

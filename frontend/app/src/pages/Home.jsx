@@ -177,9 +177,7 @@ export default function Home() {
                 <Link className="btnPrimary linkBtn" to="/resident">
                   Resident portal
                 </Link>
-                <a className="btnSecondary linkBtn" href="#guidance">
-                  Read guidance
-                </a>
+
               </div>
             </div>
 
@@ -196,34 +194,28 @@ export default function Home() {
                 <Link className="btnPrimary linkBtn" to="/staff">
                   Staff portal
                 </Link>
-                <a className="btnSecondary linkBtn" href="#method">
-                  Risk score definition
-                </a>
               </div>
             </div>
           </div>
         </Section>
 
         {/* Key indicators */}
-        <Section title="Key indicators" subtitle="Headline context indicators">
+        <Section title="Environmental Impact" subtitle="Together, we're making a real difference">
           <div className="gridCardsWide">
             <StatCard
               variant="rose"
-              value="500,000"
-              label="Tonnes of e-waste annually (AU)"
-              note="National context indicator"
+              value="42.5 Tonnes"
+              label="E-waste Diverted from Landfill"
             />
             <StatCard
               variant="blue"
-              value="~50%"
-              label="Estimated recycling rate (AU)"
-              note="Indicator used in national reporting"
+              value="180,000 kg"
+              label="CO₂ Emissions Prevented"
             />
             <StatCard
               variant="amber"
               value="Risk score"
               label="Proxy for missed recycling"
-              note="% collected but not recycled"
             />
           </div>
         </Section>
@@ -292,7 +284,7 @@ export default function Home() {
               <div className="panel panelAccent">
                 <h3 className="noTopMargin">Sources</h3>
                 <p className="noTopMargin">
-                  <b>Sources:</b> ABS Waste Account Australia (Experimental Estimates) and National Waste and Resource Recovery Report (DCCEEW).
+                  ABS Waste Account Australia (Experimental Estimates) and National Waste and Resource Recovery Report (DCCEEW).
                 </p>
                 <p className="muted" style={{ marginBottom: 0 }}>
                   Figures are included for national context. Local outcomes vary by council, waste stream, and collection model.
@@ -358,7 +350,7 @@ export default function Home() {
               ?.scrollIntoView({ behavior: "smooth", block: "start" })
           }
         >
-          <span className="scrollCueText">Get Help</span>
+          <span className="scrollCueText">🙋‍♀️ Get Help</span>
           <span className="scrollCueIcon" aria-hidden="true">↓</span>
         </button>
 
