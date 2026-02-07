@@ -4,12 +4,46 @@ import CouncilRiskMap from "../components/CouncilRiskMap";
 
 import { useAuth } from "../auth/AuthProvider";
 import { logout as cognitoLogout, getGroupsFromUser } from "../auth/authService";
+import logo from "../51009.jpg";
+
+
+function PageHero({ kicker, title, subtitle, right }) {
+  return (
+    <div className="panel panelAccentBlue" style={{ padding: 18, borderRadius: 18 }}>
+      <div className="rowBetween" style={{ gap: 14, flexWrap: "wrap" }}>
+        <div>
+          {kicker ? (
+            <div className="kicker" style={{ letterSpacing: 1.2, textTransform: "uppercase" }}>
+              {kicker}
+            </div>
+          ) : null}
+
+          <h1
+            className="noTopMargin"
+            style={{
+              marginBottom: 6,
+              fontSize: "clamp(28px, 3vw, 40px)",
+              letterSpacing: 1.2,
+              textTransform: "uppercase",
+            }}
+          >
+            {title}
+          </h1>
+
+          {subtitle ? <div className="muted">{subtitle}</div> : null}
+        </div>
+
+        {right ? <div>{right}</div> : null}
+      </div>
+    </div>
+  );
+}
+
 
 function pct(x) {
   if (x === null || x === undefined || Number.isNaN(x)) return "N/A";
   return (x * 100).toFixed(2);
 }
-
 function fmtRisk(x) {
   if (x === null || x === undefined || Number.isNaN(x)) return "N/A";
   return Number(x).toFixed(2);
@@ -41,6 +75,21 @@ function downloadText(filename, text) {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+}
+
+function Section({ title, subtitle, right, children, id }) {
+  return (
+    <section className="stack sectionBlock" id={id}>
+      <div className="sectionTop">
+        <div className="sectionTopLeft">
+          <h2 className="noTopMargin" style={{ marginBottom: 4 }}>{title}</h2>
+          {subtitle ? <div className="muted">{subtitle}</div> : null}
+        </div>
+        {right ? <div className="sectionTopRight">{right}</div> : null}
+      </div>
+      {children}
+    </section>
+  );
 }
 
 function RiskExplainer({ yearStart, selectedYearRow }) {
@@ -298,367 +347,404 @@ export default function Dashboard() {
   const selectedYearRow = ranking.find((r) => r.council === selectedCouncil);
 
   return (
-    <div className="container stack">
-      {/* Header */}
-      <div className="rowBetween">
-        <div className="titleRow">
-          <span className="pageIcon dashboard" aria-hidden="true">📊</span>
-          <h1 className="noTopMargin">Council Dashboard</h1>
-        </div>
+    <>
+      {/* Global header (aligned with Home) */}
+      <div className="headerBand">
+        <div className="headerBandInner">
+          <div className="headerLeft">
+            <Link to="/" className="brandLink">
+              <span className="brandMark" aria-hidden="true">
+                <img src={logo} alt="" className="brandLogo" />
+              </span>
+              <span className="brandText"><h1>E-Waste Manager</h1></span>
+            </Link>
+            <div className="muted headerSub">
+              Supporting responsible e-waste disposal and local decision-making
+            </div>
+          </div>
 
-        <div className="pageTopNav">
-          <Link className="btnSecondary linkBtn" to="/">Home</Link>
-          <button
-            onClick={() => cognitoLogout()}
-            className="btnPrimary"
-            disabled={authLoading}
-          >
-            Sign out
-          </button>
+          <div className="headerRight">
+            <Link className="btnSecondary linkBtn" to="/">Home</Link>
+            <Link className="btnSecondary linkBtn" to="/resident">Resident portal</Link>
+            <Link className="btnSecondary linkBtn" to="/staff">Council staff</Link>
+            <button onClick={() => cognitoLogout()} className="btnPrimary" disabled={authLoading}>
+              Sign out
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Auth context */}
-      {!authLoading && user ? (
-        <div className="panel soft">
-          <div className="muted">
-            Signed in as <b>{displayName}</b>{email ? <> (<b>{email}</b>)</> : null}
-            {groups.length ? <> • Groups: <b>{groups.join(", ")}</b></> : null}
-          </div>
-        </div>
-      ) : null}
+      <main className="container stack">
+        <PageHero
+          title="Council Dashboard"
+          right={<span className="iconTag iconTeal">Restricted</span>}
+        />
 
-      {/* Risk explainer */}
-      <RiskExplainer yearStart={yearStart ?? "the selected year"} selectedYearRow={selectedYearRow} />
-
-      {loading && <p>Loading council dataset…</p>}
-      {err && <p style={{ color: "crimson" }}>{err}</p>}
-
-      {!loading && !err && data && (
-        <>
-          {/* Filters + exports */}
-          <div className="gridTwo">
-            <div className="panel panelAccent stack">
-              <div className="sectionHeader">
-                <div>
-                  <div className="kicker">Filters</div>
-                  <h2 className="noTopMargin">Select year and council</h2>
-                </div>
-                <span className="tag">Source: {data.sourceSheet}</span>
-              </div>
-
-              <div className="row wrap">
-                <label className="row" style={{ gap: 8 }}>
-                  <b>Year</b>
-                  <select
-                    value={yearStart ?? ""}
-                    onChange={(e) => setYearStart(Number(e.target.value))}
-                  >
-                    {years.map((y) => (
-                      <option key={y} value={y}>{y}</option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="row" style={{ gap: 8 }}>
-                  <b>Council</b>
-                  <select
-                    value={selectedCouncil}
-                    onChange={(e) => setSelectedCouncil(e.target.value)}
-                  >
-                    {ranking.map((r) => (
-                      <option key={r.council} value={r.council}>{r.council}</option>
-                    ))}
-                  </select>
-                </label>
+        <Section
+          title="Welcome"
+          subtitle="This page provides e-waste indicators, map view, threshold monitoring, and CSV exports for reporting."
+          right={
+            <div className="trustBlock">
+              {/*<div className="trustTitle">Dashboard Functions</div>*/}
+              <div className="trustRow">
+                <span className="iconTag iconTeal">Ranking</span>
+                <span className="iconTag iconBlue">Map</span>
+                <span className="iconTag iconAmber">Exports</span>
               </div>
             </div>
-
-            <div className="panel panelAccentBlue stack">
-              <div className="sectionHeader">
-                <div>
-                  <div className="kicker">Exports</div>
-                  <h2 className="noTopMargin">Download CSV</h2>
-                </div>
-                <span className="tag">Reporting</span>
-              </div>
-
-              <div className="row wrap" style={{ gap: 10, justifyContent: "center" }}>
-                <button
-                  onClick={downloadRankingCSV}
-                  disabled={!ranking.length}
-                  className="btnSecondary"
-                  style={{ minWidth: 220 }}
-                >
-                  Download ranking CSV
-                </button>
-
-                <button
-                  onClick={() => selectedCouncil && downloadTrendCSVForCouncil(selectedCouncil)}
-                  disabled={!selectedCouncil}
-                  className="btnSecondary"
-                  style={{ minWidth: 220 }}
-                >
-                  Download selected council CSV
-                </button>
-              </div>
-
-              <div className="muted" style={{ textAlign: "center" }}>
-                Exports include the full time series available for each council.
-              </div>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="tabs" role="tablist" aria-label="Dashboard tabs">
-            <button
-              type="button"
-              className={activeTab === "ranking" ? "tabBtn tabBtnActive" : "tabBtn"}
-              onClick={() => setActiveTab("ranking")}
-            >
-              Ranking
-            </button>
-            <button
-              type="button"
-              className={activeTab === "map" ? "tabBtn tabBtnActive" : "tabBtn"}
-              onClick={() => setActiveTab("map")}
-            >
-              Map
-            </button>
-            <button
-              type="button"
-              className={activeTab === "alerts" ? "tabBtn tabBtnActive" : "tabBtn"}
-              onClick={() => setActiveTab("alerts")}
-            >
-              Alerts
-            </button>
-            <button
-              type="button"
-              className={activeTab === "detail" ? "tabBtn tabBtnActive" : "tabBtn"}
-              onClick={() => setActiveTab("detail")}
-            >
-              Detail & Trend
-            </button>
-          </div>
-
-          {/* Alerts */}
-          {activeTab === "alerts" && (
-            <div className="panel panelAccentRose stack">
-              <div className="sectionHeader">
-                <div>
-                  <div className="kicker">Alerts</div>
-                  <h2 className="noTopMargin">Threshold monitoring</h2>
-                </div>
-                <span className="tag">Year: {yearStart}</span>
-              </div>
-
-              <div className="row wrap" style={{ justifyContent: "space-between" }}>
-                <label className="row" style={{ gap: 8 }}>
-                  <b>Risk threshold (%)</b>
-                  <input
-                    type="number"
-                    value={riskThreshold}
-                    onChange={(e) => setRiskThreshold(Number(e.target.value))}
-                    className="inputSmall"
-                    min="0"
-                    max="100"
-                    step="0.5"
-                  />
-                </label>
-
-                <div className="muted">
-                  <b>{aboveThreshold.length}</b> councils at or above <b>{riskThreshold}%</b>
-                </div>
-              </div>
-
-              {aboveThreshold.length === 0 ? (
-                <p className="muted">No councils exceed the threshold.</p>
-              ) : (
-                <div className="tableWrap">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Council</th>
-                        <th>Risk (%)</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {aboveThreshold.slice(0, 10).map((r) => (
-                        <tr key={r.council}>
-                          <td><b>{r.council}</b></td>
-                          <td>{fmtRisk(r.risk_score)}</td>
-                          <td style={{ textAlign: "right" }}>
-                            <button
-                              className="btnTiny"
-                              onClick={() => {
-                                setSelectedCouncil(r.council);
-                                promptDownloadCouncilCSV(r.council);
-                              }}
-                            >
-                              View
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {aboveThreshold.length > 10 && (
-                <div className="muted">Showing first 10 results.</div>
-              )}
-            </div>
-          )}
-
-          {/* Map */}
-          {activeTab === "map" && (
-            <div className="panel mapPanel panelAccent">
-              <div className="mapViewport">
-                <CouncilRiskMap
-                  ranking={ranking}
-                  selectedCouncil={selectedCouncil}
-                  onSelectCouncil={setSelectedCouncil}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Ranking */}
-          {activeTab === "ranking" && (
-            <div className="stack">
-              <h2>Ranked LGAs (Year {yearStart})</h2>
-
-              {ranking.length === 0 ? (
-                <p>Data unavailable for this year.</p>
-              ) : (
-                <div className="tableWrap">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Rank</th>
-                        <th>Council</th>
-                        <th>Risk (%)</th>
-                        <th>Recovery (%)</th>
-                        <th>Collected (t)</th>
-                        <th>Recycled (t)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {ranking.slice(0, 20).map((r) => (
-                        <tr
-                          key={r.council}
-                          className={r.council === selectedCouncil ? "clickRow selected" : "clickRow"}
-                          onClick={() => setSelectedCouncil(r.council)}
-                        >
-                          <td>{r.rank}</td>
-                          <td><b>{r.council}</b></td>
-                          <td>{fmtRisk(r.risk_score)}</td>
-                          <td>{pct(r.recovery_rate)}</td>
-                          <td>{r.collected ?? "N/A"}</td>
-                          <td>{r.recycled ?? "N/A"}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Detail */}
-          {activeTab === "detail" && (
-            <div className="stack">
-              <h2>Selected LGA detail</h2>
-
-              {!selectedYearRow ? (
-                <p>Data unavailable for the selected council/year.</p>
-              ) : (
-                <div className="panel panelAccentBlue">
-                  <div><b>{selectedCouncil}</b> ({selectedYearRow.financial_year})</div>
-                  <ul style={{ marginTop: 8 }}>
-                    <li><b>Risk score:</b> {fmtRisk(selectedYearRow.risk_score)}%</li>
-                    <li><b>Recovery rate:</b> {pct(selectedYearRow.recovery_rate)}%</li>
-                    <li><b>Collected:</b> {selectedYearRow.collected ?? "N/A"} tonnes</li>
-                    <li><b>Recycled:</b> {selectedYearRow.recycled ?? "N/A"} tonnes</li>
-                  </ul>
-                </div>
-              )}
-
-              <h3>Trend over time (all years)</h3>
-              {trend.length === 0 ? (
-                <p>No trend data available.</p>
-              ) : (
-                <div className="tableWrap">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Financial Year</th>
-                        <th>Risk (%)</th>
-                        <th>Recovery (%)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {trend.map((t) => (
-                        <tr key={t.financial_year}>
-                          <td>{t.financial_year}</td>
-                          <td>{fmtRisk(t.risk_score)}</td>
-                          <td>{pct(t.recovery_rate)}%</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              <p className="muted">Iteration 2</p>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* CSV prompt modal */}
-      {csvPromptOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.35)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-            zIndex: 9999,
-          }}
-          onClick={cancelDownloadCouncilCSV}
+          }
         >
-          <div
-            className="panel"
-            style={{ width: "min(560px, 100%)" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="noTopMargin">Download council CSV?</h3>
-            <div className="muted">
-              Download the full trend CSV for <b>{csvPromptCouncil}</b>?
+          {!authLoading && user ? (
+            <div className="panel soft">
+              <div className="muted">
+                Signed in as <b>{displayName}</b>{email ? <> (<b>{email}</b>)</> : null}
+                {groups.length ? <> • Groups: <b>{groups.join(", ")}</b></> : null}
+              </div>
             </div>
+          ) : null}
 
-            <div
-              className="row wrap mt12"
-              style={{ gap: 10, justifyContent: "center" }}
+          <RiskExplainer yearStart={yearStart ?? "the selected year"} selectedYearRow={selectedYearRow} />
+
+          {loading && (
+            <div className="panel">
+              <b>Loading council dataset…</b>
+              <div className="muted mt8">Please wait while the dashboard data loads.</div>
+            </div>
+          )}
+
+          {err && (
+            <div className="panel panelCallout panelCallout-danger">
+              <b>Data load error</b>
+              <div className="muted mt8">{err}</div>
+            </div>
+          )}
+        </Section>
+
+        {!loading && !err && data && (
+          <>
+            <Section
+              title="Filters and exports"
+              subtitle="Select year/council, then download ranking or council trend CSVs."
+              right={<span className="iconTag iconBlue">Source: {data.sourceSheet}</span>}
             >
-              <button className="btnPrimary" style={{ minWidth: 180 }} type="button" onClick={confirmDownloadCouncilCSV}>
-                Yes, download
-              </button>
-              <button className="btnSecondary" style={{ minWidth: 180 }} type="button" onClick={cancelDownloadCouncilCSV}>
-                Cancel
-              </button>
+              <div className="gridTwo">
+                <div className="panel panelAccent stack">
+                  <div className="sectionHeader">
+                    <div>
+                      <div className="kicker">Filters</div>
+                      <h3 className="noTopMargin">Select year and council</h3>
+                    </div>
+                    <span className="tag">Year: {yearStart ?? "—"}</span>
+                  </div>
+
+                  <div className="row wrap">
+                    <label className="row" style={{ gap: 8 }}>
+                      <b>Year</b>
+                      <select value={yearStart ?? ""} onChange={(e) => setYearStart(Number(e.target.value))}>
+                        {years.map((y) => (
+                          <option key={y} value={y}>{y}</option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="row" style={{ gap: 8 }}>
+                      <b>Council</b>
+                      <select value={selectedCouncil} onChange={(e) => setSelectedCouncil(e.target.value)}>
+                        {ranking.map((r) => (
+                          <option key={r.council} value={r.council}>{r.council}</option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="panel panelAccentBlue stack">
+                  <div className="sectionHeader">
+                    <div>
+                      <div className="kicker">Exports</div>
+                      <h3 className="noTopMargin">Download CSV</h3>
+                    </div>
+                    <span className="tag">Reporting</span>
+                  </div>
+
+                  <div className="row wrap" style={{ gap: 10, justifyContent: "center" }}>
+                    <button
+                      onClick={downloadRankingCSV}
+                      disabled={!ranking.length}
+                      className="btnSecondary"
+                      style={{ minWidth: 240 }}
+                    >
+                      Download ranking CSV
+                    </button>
+
+                    <button
+                      onClick={() => selectedCouncil && downloadTrendCSVForCouncil(selectedCouncil)}
+                      disabled={!selectedCouncil}
+                      className="btnSecondary"
+                      style={{ minWidth: 240 }}
+                    >
+                      Download selected council CSV
+                    </button>
+                  </div>
+
+                  <div className="muted" style={{ textAlign: "center" }}>
+                    Exports include the full time series available for each council.
+                  </div>
+                </div>
+              </div>
+            </Section>
+
+            <Section title="Views" subtitle="Switch between ranking, map, alerts, and detail/trend.">
+              <div className="tabs" role="tablist" aria-label="Dashboard tabs">
+                <button
+                  type="button"
+                  className={activeTab === "ranking" ? "tabBtn tabBtnActive" : "tabBtn"}
+                  onClick={() => setActiveTab("ranking")}
+                >
+                  Ranking
+                </button>
+                <button
+                  type="button"
+                  className={activeTab === "map" ? "tabBtn tabBtnActive" : "tabBtn"}
+                  onClick={() => setActiveTab("map")}
+                >
+                  Map
+                </button>
+                <button
+                  type="button"
+                  className={activeTab === "alerts" ? "tabBtn tabBtnActive" : "tabBtn"}
+                  onClick={() => setActiveTab("alerts")}
+                >
+                  Alerts
+                </button>
+                <button
+                  type="button"
+                  className={activeTab === "detail" ? "tabBtn tabBtnActive" : "tabBtn"}
+                  onClick={() => setActiveTab("detail")}
+                >
+                  Detail & Trend
+                </button>
+              </div>
+
+              {/* Alerts */}
+              {activeTab === "alerts" && (
+                <div className="panel panelAccentRose stack">
+                  <div className="sectionHeader">
+                    <div>
+                      <div className="kicker">Alerts</div>
+                      <h3 className="noTopMargin">Threshold monitoring</h3>
+                    </div>
+                    <span className="tag">Year: {yearStart}</span>
+                  </div>
+
+                  <div className="row wrap" style={{ justifyContent: "space-between" }}>
+                    <label className="row" style={{ gap: 8 }}>
+                      <b>Risk threshold (%)</b>
+                      <input
+                        type="number"
+                        value={riskThreshold}
+                        onChange={(e) => setRiskThreshold(Number(e.target.value))}
+                        className="inputSmall"
+                        min="0"
+                        max="100"
+                        step="0.5"
+                      />
+                    </label>
+
+                    <div className="muted">
+                      <b>{aboveThreshold.length}</b> councils at or above <b>{riskThreshold}%</b>
+                    </div>
+                  </div>
+
+                  {aboveThreshold.length === 0 ? (
+                    <p className="muted">No councils exceed the threshold.</p>
+                  ) : (
+                    <div className="tableWrap">
+                      <table className="table">
+                        <thead>
+                          <tr>
+                            <th>Council</th>
+                            <th>Risk (%)</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {aboveThreshold.slice(0, 10).map((r) => (
+                            <tr key={r.council}>
+                              <td><b>{r.council}</b></td>
+                              <td>{fmtRisk(r.risk_score)}</td>
+                              <td style={{ textAlign: "right" }}>
+                                <button
+                                  className="btnTiny"
+                                  onClick={() => {
+                                    setSelectedCouncil(r.council);
+                                    promptDownloadCouncilCSV(r.council);
+                                  }}
+                                >
+                                  View
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {aboveThreshold.length > 10 && (
+                    <div className="muted">Showing first 10 results.</div>
+                  )}
+                </div>
+              )}
+
+              {/* Map */}
+              {activeTab === "map" && (
+                <div className="panel mapPanel panelAccent">
+                  <div className="mapViewport">
+                    <CouncilRiskMap
+                      ranking={ranking}
+                      selectedCouncil={selectedCouncil}
+                      onSelectCouncil={setSelectedCouncil}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Ranking */}
+              {activeTab === "ranking" && (
+                <div className="stack">
+                  <div className="panel panelAccentBlue">
+                    <h3 className="noTopMargin">Ranked LGAs (Year {yearStart})</h3>
+                    <div className="muted">Click a council row to update the selected council.</div>
+                  </div>
+
+                  {ranking.length === 0 ? (
+                    <div className="panel"><b>Data unavailable for this year.</b></div>
+                  ) : (
+                    <div className="tableWrap">
+                      <table className="table">
+                        <thead>
+                          <tr>
+                            <th>Rank</th>
+                            <th>Council</th>
+                            <th>Risk (%)</th>
+                            <th>Recovery (%)</th>
+                            <th>Collected (t)</th>
+                            <th>Recycled (t)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {ranking.slice(0, 20).map((r) => (
+                            <tr
+                              key={r.council}
+                              className={r.council === selectedCouncil ? "clickRow selected" : "clickRow"}
+                              onClick={() => setSelectedCouncil(r.council)}
+                            >
+                              <td>{r.rank}</td>
+                              <td><b>{r.council}</b></td>
+                              <td>{fmtRisk(r.risk_score)}</td>
+                              <td>{pct(r.recovery_rate)}</td>
+                              <td>{r.collected ?? "N/A"}</td>
+                              <td>{r.recycled ?? "N/A"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Detail */}
+              {activeTab === "detail" && (
+                <div className="stack">
+                  <div className="panel panelAccent">
+                    <h3 className="noTopMargin">Selected LGA detail</h3>
+                    <div className="muted">Details for the selected year, plus full-year trend table below.</div>
+                  </div>
+
+                  {!selectedYearRow ? (
+                    <div className="panel"><b>Data unavailable for the selected council/year.</b></div>
+                  ) : (
+                    <div className="panel panelAccentBlue">
+                      <div><b>{selectedCouncil}</b> ({selectedYearRow.financial_year})</div>
+                      <ul style={{ marginTop: 8 }}>
+                        <li><b>Risk score:</b> {fmtRisk(selectedYearRow.risk_score)}%</li>
+                        <li><b>Recovery rate:</b> {pct(selectedYearRow.recovery_rate)}%</li>
+                        <li><b>Collected:</b> {selectedYearRow.collected ?? "N/A"} tonnes</li>
+                        <li><b>Recycled:</b> {selectedYearRow.recycled ?? "N/A"} tonnes</li>
+                      </ul>
+                    </div>
+                  )}
+
+                  <h3 className="noTopMargin">Trend over time (all years)</h3>
+                  {trend.length === 0 ? (
+                    <div className="panel"><b>No trend data available.</b></div>
+                  ) : (
+                    <div className="tableWrap">
+                      <table className="table">
+                        <thead>
+                          <tr>
+                            <th>Financial Year</th>
+                            <th>Risk (%)</th>
+                            <th>Recovery (%)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {trend.map((t) => (
+                            <tr key={t.financial_year}>
+                              <td>{t.financial_year}</td>
+                              <td>{fmtRisk(t.risk_score)}</td>
+                              <td>{pct(t.recovery_rate)}%</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  <p className="muted">Iteration 2</p>
+                </div>
+              )}
+            </Section>
+          </>
+        )}
+
+        {/* CSV prompt modal */}
+        {csvPromptOpen && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.35)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 16,
+              zIndex: 9999,
+            }}
+            onClick={cancelDownloadCouncilCSV}
+          >
+            <div className="panel" style={{ width: "min(560px, 100%)" }} onClick={(e) => e.stopPropagation()}>
+              <h3 className="noTopMargin">Download council CSV?</h3>
+              <div className="muted">
+                Download the full trend CSV for <b>{csvPromptCouncil}</b>?
+              </div>
+
+              <div className="row wrap mt12" style={{ gap: 10, justifyContent: "center" }}>
+                <button className="btnPrimary" style={{ minWidth: 180 }} type="button" onClick={confirmDownloadCouncilCSV}>
+                  Yes, download
+                </button>
+                <button className="btnSecondary" style={{ minWidth: 180 }} type="button" onClick={cancelDownloadCouncilCSV}>
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </main>
+    </>
   );
 }

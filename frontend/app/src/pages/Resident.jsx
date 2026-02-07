@@ -3,10 +3,60 @@ import { Link } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthProvider";
 import { isInGroup, loginWithHint, logout, signupWithHint } from "../auth/authService";
+import logo from "../51009.jpg";
+
+
+function PageHero({ kicker, title, subtitle, right }) {
+  return (
+    <div className="panel panelAccentBlue" style={{ padding: 18, borderRadius: 18 }}>
+      <div className="rowBetween" style={{ gap: 14, flexWrap: "wrap" }}>
+        <div>
+          {kicker ? (
+            <div className="kicker" style={{ letterSpacing: 1.2, textTransform: "uppercase" }}>
+              {kicker}
+            </div>
+          ) : null}
+
+          <h1
+            className="noTopMargin"
+            style={{
+              marginBottom: 6,
+              fontSize: "clamp(28px, 3vw, 40px)",
+              letterSpacing: 1.2,
+              textTransform: "uppercase",
+            }}
+          >
+            {title}
+          </h1>
+
+          {subtitle ? <div className="muted">{subtitle}</div> : null}
+        </div>
+
+        {right ? <div>{right}</div> : null}
+      </div>
+    </div>
+  );
+}
+
 
 function mapsLink(address, suburb) {
   const q = encodeURIComponent([address, suburb].filter(Boolean).join(", "));
   return `https://www.google.com/maps/search/?api=1&query=${q}`;
+}
+
+function Section({ title, subtitle, right, children, id }) {
+  return (
+    <section className="stack sectionBlock" id={id}>
+      <div className="sectionTop">
+        <div className="sectionTopLeft">
+          <h2 className="noTopMargin" style={{ marginBottom: 4 }}>{title}</h2>
+          {subtitle ? <div className="muted">{subtitle}</div> : null}
+        </div>
+        {right ? <div className="sectionTopRight">{right}</div> : null}
+      </div>
+      {children}
+    </section>
+  );
 }
 
 function StatBox({ title, value, subtitle, rightNote }) {
@@ -95,18 +145,11 @@ function PartnerCard({ name, deal, address, phone, url }) {
         </div>
 
         {url ? (
-          <a
-            className="btnSecondary linkBtn"
-            href={url}
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a className="btnSecondary linkBtn" href={url} target="_blank" rel="noreferrer">
             Visit
           </a>
         ) : (
-          <button className="btnSecondary" type="button" disabled>
-            Visit
-          </button>
+          <button className="btnSecondary" type="button" disabled>Visit</button>
         )}
       </div>
 
@@ -115,7 +158,6 @@ function PartnerCard({ name, deal, address, phone, url }) {
     </div>
   );
 }
-
 
 function VoucherCard({ title, desc, points, onRedeem, disabled }) {
   return (
@@ -128,12 +170,7 @@ function VoucherCard({ title, desc, points, onRedeem, disabled }) {
           <div className="muted">Required Points</div>
           <div className="voucherPoints"><b>{points}</b></div>
         </div>
-        <button
-          type="button"
-          className="btnPrimary"
-          disabled={disabled}
-          onClick={onRedeem}
-        >
+        <button type="button" className="btnPrimary" disabled={disabled} onClick={onRedeem}>
           Redeem Now
         </button>
       </div>
@@ -142,7 +179,6 @@ function VoucherCard({ title, desc, points, onRedeem, disabled }) {
 }
 
 export default function Resident() {
-  // ===== Cognito auth state =====
   const { user, loading: authLoading } = useAuth();
   const authed = !!user;
 
@@ -157,15 +193,14 @@ export default function Resident() {
 
   const incentivesLocked = !isResidentUser;
 
-  // ===== Demo stats (replace with real backend later) =====
+  // Demo stats
   const lifetimeItems = 46;
-  const availableCredit = 45.80;
+  const availableCredit = 45.8;
   const memberRank = "Silver";
   const rankProgress = `${lifetimeItems}/100`;
   const points = 458;
 
   const [activeTab, setActiveTab] = useState("guides");
-
 
   const [facilities, setFacilities] = useState([]);
   const [suburbInput, setSuburbInput] = useState("");
@@ -319,7 +354,6 @@ export default function Resident() {
     },
   ];
 
-
   const voucherOptions = [
     { title: "$10 Council Services Voucher", desc: "Redeem for council services", points: 100 },
     { title: "Free Green Waste Collection", desc: "One free collection service", points: 150 },
@@ -331,335 +365,349 @@ export default function Resident() {
   }
 
   return (
-    <div className="container stack">
-      <div className="rowBetween">
-        <div className="titleRow">
-          <span className="pageIcon resident" aria-hidden="true">🏠</span>
-          <h1 className="noTopMargin">Resident Portal</h1>
+    <>
+      {/* Global header (aligned with Home) */}
+      <div className="headerBand">
+        <div className="headerBandInner">
+          <div className="headerLeft">
+            <Link to="/" className="brandLink">
+              <span className="brandMark" aria-hidden="true">
+                <img src={logo} alt="" className="brandLogo" />
+              </span>
+              <span className="brandText"><h1>E-Waste Manager</h1></span>
+            </Link>
+            <div className="muted headerSub">
+              Supporting responsible e-waste disposal and local decision-making
+            </div>
+          </div>
+
+          <div className="headerRight">
+            <Link className="btnSecondary linkBtn" to="/resident">Resident portal</Link>
+            <Link className="btnSecondary linkBtn" to="/staff">Council staff</Link>
+            {!authLoading && authed ? (
+              <button className="btnPrimary" type="button" onClick={() => logout()}>
+                Sign out
+              </button>
+            ) : null}
+          </div>
         </div>
+      </div>
 
-        <div className="pageTopNav">
-          <Link className="btnSecondary linkBtn" to="/">Home</Link>
+      {/* Constrained content */}
+      <main className="container stack">
+        <PageHero
+          title="Resident Portal"
+          subtitle="Guidance, drop-off finder, and rewards."
+        />
 
-
-          {!authLoading && !authed ? (
-            <>
-              <button
-                className="btnPrimary"
-                type="button"
-                onClick={() => loginWithHint("resident")}
-                title="Sign in with a Resident account"
-              >
-                Resident Sign In
-              </button>
-
-              <button
-                className="btnSecondary"
-                type="button"
-                onClick={() => signupWithHint("resident")}
-                title="Create a Resident account"
-              >
-                Create account
-              </button>
-            </>
-          ) : null}
-
-
+        <Section
+          title="Sign-in details"
+          right={
+            <div className="trustBlock">
+              {/*<div className="trustTitle">Portal</div>*/}
+              <div className="trustRow">
+                <span className="iconTag iconBlue">Guides</span>
+                <span className="iconTag iconTeal">Drop-off finder</span>
+                <span className="iconTag iconPurple">Vouchers</span>
+              </div>
+            </div>
+          }
+        >
           {!authLoading && authed ? (
-            <button className="btnSecondary" type="button" onClick={() => logout()}>
-              Logout
-            </button>
+            <div className="panel soft">
+              <div className="muted">
+                Signed in as <b>{displayName}</b>
+                {isResidentUser ? <> • <b>Resident</b></> : null}
+                {isStaffUser && !isResidentUser ? <> • <b>Staff</b></> : null}
+              </div>
+            </div>
+          ) : (
+            <div className="panel panelCallout panelCallout-warn">
+              <b>Sign in to unlock incentives</b>
+              <div className="muted mt8">
+                Guides and drop-off finder work without an account. Rewards features require a Resident account.
+              </div>
+              <div className="row wrap mt12" style={{ justifyContent: "center" }}>
+                <button className="btnPrimary" type="button" onClick={() => loginWithHint("resident")}>
+                  Resident Sign In
+                </button>
+                <button className="btnSecondary" type="button" onClick={() => signupWithHint("resident")}>
+                  Create account
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!authLoading && authed && isStaffUser && !isResidentUser ? (
+            <div className="panel panelCallout panelCallout-warn">
+              <b>Signed in as staff</b>
+              <div className="muted mt8">
+                Your account is in the Staff group. Resident rewards features are disabled for this session.
+              </div>
+              <div className="row wrap mt12">
+                <Link className="btnPrimary linkBtn" to="/dashboard">Go to Dashboard</Link>
+                <button className="btnSecondary" type="button" onClick={() => logout()}>
+                  Logout and switch account
+                </button>
+              </div>
+            </div>
           ) : null}
-        </div>
-      </div>
+        </Section>
 
-      {!authLoading && authed ? (
-        <div className="muted" style={{ marginTop: -8 }}>
-          Signed in as <b>{displayName}</b>
-          {isResidentUser ? <> • <b>Resident</b></> : null}
-          {isStaffUser && !isResidentUser ? <> • <b>Staff</b></> : null}
-        </div>
-      ) : null}
-
-      {!authLoading && authed && isStaffUser && !isResidentUser ? (
-        <div className="panel" style={{ borderLeft: "4px solid #d97706" }}>
-          <b>Signed in as staff</b>
-          <div className="muted">
-            Your account is in the Staff group. Resident rewards features are disabled for this session.
-          </div>
-          <div className="row wrap mt12">
-            <Link className="btnPrimary linkBtn" to="/dashboard">Go to Dashboard</Link>
-            <button className="btnSecondary" type="button" onClick={() => logout()}>
-              Logout and switch account
-            </button>
-          </div>
-        </div>
-      ) : null}
-
-      {isResidentUser ? (
-        <div className="gridStats">
-          <StatBox title="Items Recycled" value={lifetimeItems} subtitle="Lifetime total" />
-          <StatBox title="Total Earned" value={`$${availableCredit.toFixed(2)}`} subtitle="Available credit" />
-          <StatBox title="Member Rank" value={memberRank} subtitle="Progress to Gold" rightNote={rankProgress} />
-        </div>
-      ) : (
-        <div className="panel">
-          <b>Sign in to see your stats</b>
-          <div className="muted" style={{ marginTop: 6 }}>
-            Your recycling totals, credits, and rank are linked to your account.
-          </div>
-          <div className="row wrap mt12" style={{ gap: 10 }}>
-            <button className="btnPrimary" type="button" onClick={() => loginWithHint("resident")}>
-              Sign in
-            </button>
-            <button className="btnSecondary" type="button" onClick={() => signupWithHint("resident")}>
-              Create account
-            </button>
-          </div>
-        </div>
-      )}
-
-
-      <div className="tabs" role="tablist" aria-label="Resident features">
-        <TabButton id="guides" activeTab={activeTab} setActiveTab={setActiveTab}>Disposal Guides</TabButton>
-        <TabButton id="incentives" activeTab={activeTab} setActiveTab={setActiveTab}>
-          My Incentives {incentivesLocked ? "🔒" : ""}
-        </TabButton>
-        <TabButton id="partners" activeTab={activeTab} setActiveTab={setActiveTab}>Partners & Deals</TabButton>
-        <TabButton id="vouchers" activeTab={activeTab} setActiveTab={setActiveTab}>
-          Vouchers {incentivesLocked ? "🔒" : ""}
-        </TabButton>
-      </div>
-
-      {activeTab === "guides" && (
-        <div className="stack">
-          <div className="stack">
-            <h2 className="noTopMargin">E-Waste Disposal Guides</h2>
-            <div className="muted">
-              Click on each category to learn how to properly dispose of different types of electronic waste.
+        <Section
+          title="Your stats"
+          subtitle={isResidentUser ? "Your totals and membership details for this account." : "Sign in to see your personal totals and rewards."}
+        >
+          {isResidentUser ? (
+            <div className="gridStats">
+              <StatBox title="Items Recycled" value={lifetimeItems} subtitle="Lifetime total" />
+              <StatBox title="Total Earned" value={`$${availableCredit.toFixed(2)}`} subtitle="Available credit" />
+              <StatBox title="Member Rank" value={memberRank} subtitle="Progress to Gold" rightNote={rankProgress} />
             </div>
-          </div>
-
-          <div className="gridGuides">
-            {guides.map((g) => (
-              <GuideCard
-                key={g.title}
-                title={g.title}
-                subtitle={g.subtitle}
-                whatCounts={g.whatCounts}
-                howToDispose={g.howToDispose}
-              />
-            ))}
-          </div>
-
-          <div className="panel stack">
-            <h3 className="noTopMargin">Find a nearby drop-off point</h3>
-            <div className="muted">
-              Start typing a suburb and pick from the dropdown suggestions.
+          ) : (
+            <div className="panel">
+              <b>Sign in to see your stats</b>
+              <div className="muted mt8">
+                Your recycling totals, credits, and rank are linked to your account.
+              </div>
+              <div className="row wrap mt12" style={{ justifyContent: "center" }}>
+                <button className="btnPrimary" type="button" onClick={() => loginWithHint("resident")}>
+                  Sign in
+                </button>
+                <button className="btnSecondary" type="button" onClick={() => signupWithHint("resident")}>
+                  Create account
+                </button>
+              </div>
             </div>
+          )}
+        </Section>
 
-            <form onSubmit={onSearch} className="row wrap">
-              <div style={{ width: "min(520px, 100%)" }}>
-                <input
-                  value={suburbInput}
-                  onChange={(e) => setSuburbInput(e.target.value)}
-                  placeholder="Enter suburb (e.g., Glen Iris)"
-                  className="input"
-                  list="suburb-options"
-                  autoComplete="off"
-                />
-                <datalist id="suburb-options">
-                  {suburbOptions.map((s) => (
-                    <option key={s} value={s} />
-                  ))}
-                </datalist>
+        <Section
+          title="Features"
+          subtitle="Use the tabs to switch between guides, incentives, partners, and vouchers."
+          right={
+            <span className="iconTag iconTeal">
+              {incentivesLocked ? "Rewards locked 🔒" : "Rewards enabled ✅"}
+            </span>
+          }
+        >
+          <div className="tabs" role="tablist" aria-label="Resident features">
+            <TabButton id="guides" activeTab={activeTab} setActiveTab={setActiveTab}>Disposal Guides</TabButton>
+            <TabButton id="incentives" activeTab={activeTab} setActiveTab={setActiveTab}>
+              My Incentives {incentivesLocked ? "🔒" : ""}
+            </TabButton>
+            <TabButton id="partners" activeTab={activeTab} setActiveTab={setActiveTab}>Partners & Deals</TabButton>
+            <TabButton id="vouchers" activeTab={activeTab} setActiveTab={setActiveTab}>
+              Vouchers {incentivesLocked ? "🔒" : ""}
+            </TabButton>
+          </div>
+
+          {activeTab === "guides" && (
+            <div className="stack">
+              <div className="panel panelAccentBlue">
+                <h3 className="noTopMargin">E-Waste Disposal Guides</h3>
+                <div className="muted">
+                  Click on each category to learn how to properly dispose of different types of electronic waste.
+                </div>
               </div>
 
-              <button type="submit" className="btnPrimary">Search</button>
-            </form>
+              <div className="gridGuides">
+                {guides.map((g) => (
+                  <GuideCard key={g.title} {...g} />
+                ))}
+              </div>
 
-            {loadingFacilities && <p className="muted">Loading facilities…</p>}
-            {facErr && <p style={{ color: "crimson" }}>{facErr}</p>}
+              <div className="panel panelAccent stack">
+                <h3 className="noTopMargin">Find a nearby drop-off point</h3>
+                <div className="muted">
+                  Start typing a suburb and pick from the dropdown suggestions.
+                </div>
 
-            {!loadingFacilities && !facErr && submitted.trim() && results.length === 0 && (
-              <p className="muted">
-                No nearby facilities found for “{submitted}”. Try a neighbouring suburb or check spelling.
-              </p>
-            )}
+                <form onSubmit={onSearch} className="row wrap">
+                  <div style={{ width: "min(520px, 100%)" }}>
+                    <input
+                      value={suburbInput}
+                      onChange={(e) => setSuburbInput(e.target.value)}
+                      placeholder="Enter suburb (e.g., Glen Iris)"
+                      className="input"
+                      list="suburb-options"
+                      autoComplete="off"
+                    />
+                    <datalist id="suburb-options">
+                      {suburbOptions.map((s) => (
+                        <option key={s} value={s} />
+                      ))}
+                    </datalist>
+                  </div>
+                  <button type="submit" className="btnPrimary">Search</button>
+                </form>
 
-            {!loadingFacilities && !facErr && results.length > 0 && (
-              <div className="stack">
-                <h4 className="noTopMargin">Results</h4>
-                <div className="stack">
-                  {results.map((f) => (
-                    <div key={f.id} className="panel facilityRow">
-                      <div className="rowBetween">
-                        <div>
-                          <div><b>{f.name}</b></div>
-                          <div className="muted">{f.address}{f.suburb ? `, ${f.suburb}` : ""}</div>
-                          <div className="muted">
-                            {f.facilityType ? `Type: ${f.facilityType}` : ""}
-                            {f.infrastructureType ? ` • ${f.infrastructureType}` : ""}
+                {loadingFacilities && <p className="muted">Loading facilities…</p>}
+                {facErr && (
+                  <div className="panel panelCallout panelCallout-danger">
+                    <b>Facility lookup unavailable</b>
+                    <div className="muted mt8">{facErr}</div>
+                  </div>
+                )}
+
+                {!loadingFacilities && !facErr && submitted.trim() && results.length === 0 && (
+                  <p className="muted">
+                    No nearby facilities found for “{submitted}”. Try a neighbouring suburb or check spelling.
+                  </p>
+                )}
+
+                {!loadingFacilities && !facErr && results.length > 0 && (
+                  <div className="stack">
+                    <h4 className="noTopMargin">Results</h4>
+                    <div className="stack">
+                      {results.map((f) => (
+                        <div key={f.id} className="panel facilityRow">
+                          <div className="rowBetween">
+                            <div>
+                              <div><b>{f.name}</b></div>
+                              <div className="muted">{f.address}{f.suburb ? `, ${f.suburb}` : ""}</div>
+                              <div className="muted">
+                                {f.facilityType ? `Type: ${f.facilityType}` : ""}
+                                {f.infrastructureType ? ` • ${f.infrastructureType}` : ""}
+                              </div>
+                            </div>
+                            <a className="btnSecondary" href={mapsLink(f.address, f.suburb)} target="_blank" rel="noreferrer">
+                              Directions
+                            </a>
                           </div>
                         </div>
-                        <a
-                          className="btnSecondary"
-                          href={mapsLink(f.address, f.suburb)}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Directions
-                        </a>
-                      </div>
+                      ))}
                     </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="panel panelAccentPurple stack">
+                <h3 className="noTopMargin" id="data-wiping">Data wiping help</h3>
+                <div className="muted">Simple steps to protect your personal data before recycling:</div>
+
+                <div className="gridTwo">
+                  <div className="panel soft">
+                    <h4 className="noTopMargin">Phones (iPhone/Android)</h4>
+                    <ul className="stack">
+                      <li>Back up photos/files you want to keep.</li>
+                      <li>Sign out of your Apple ID / Google account.</li>
+                      <li>Turn off activation lock / “Find My”.</li>
+                      <li>Run “Factory reset” from Settings.</li>
+                    </ul>
+                  </div>
+
+                  <div className="panel soft">
+                    <h4 className="noTopMargin">Laptops (Windows/macOS)</h4>
+                    <ul className="stack">
+                      <li>Back up files.</li>
+                      <li>Sign out of accounts and de-authorise apps if needed.</li>
+                      <li>Use “Reset this PC” (Windows) or “Erase All Content and Settings” (macOS).</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="muted">Iteration 2</div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "incentives" && (
+            incentivesLocked ? (
+              <div className="panel panelCallout panelCallout-warn">
+                <h3 className="noTopMargin">My Recycling Incentives</h3>
+                <div className="muted">
+                  Sign in with a Resident account to view your balance and transactions.
+                </div>
+                <div className="row wrap mt12" style={{ justifyContent: "center" }}>
+                  <button className="btnPrimary" type="button" onClick={() => loginWithHint("resident")}>Sign in</button>
+                  <button className="btnSecondary" type="button" onClick={() => signupWithHint("resident")}>Create account</button>
+                </div>
+              </div>
+            ) : (
+              <div className="stack">
+                <div className="panel panelAccentBlue">
+                  <h3 className="noTopMargin">My Recycling Incentives</h3>
+                  <div className="muted">Welcome, {displayName}. Earn $2.00 credit for each item recycled properly</div>
+                </div>
+
+                <div className="panel">
+                  <div className="muted">Available Balance</div>
+                  <div className="moneyBig">${availableCredit.toFixed(2)}</div>
+                </div>
+
+                <div className="stack">
+                  <h3 className="noTopMargin">Recent Transactions</h3>
+                  <div className="gridTx">
+                    {transactions.map((t) => <TxRow key={`${t.item}-${t.date}`} {...t} />)}
+                  </div>
+                </div>
+              </div>
+            )
+          )}
+
+          {activeTab === "partners" && (
+            <div className="stack">
+              <div className="panel panelAccent">
+                <h3 className="noTopMargin">Recycling Partners & Special Deals</h3>
+                <div className="muted">Find authorized recycling partners and official location directories</div>
+              </div>
+
+              <div className="gridPartners">
+                {partners.map((p) => <PartnerCard key={p.name} {...p} />)}
+              </div>
+
+              <div className="muted" style={{ marginTop: 8 }}>
+                Links open official program pages / location finders. Availability varies by suburb and item type—check provider pages for accepted items and hours.
+              </div>
+            </div>
+          )}
+
+          {activeTab === "vouchers" && (
+            incentivesLocked ? (
+              <div className="panel panelCallout panelCallout-warn">
+                <h3 className="noTopMargin">Council Discounts & Vouchers</h3>
+                <div className="muted">Sign in with a Resident account to redeem vouchers.</div>
+                <div className="row wrap mt12" style={{ justifyContent: "center" }}>
+                  <button className="btnPrimary" type="button" onClick={() => loginWithHint("resident")}>Sign in</button>
+                  <button className="btnSecondary" type="button" onClick={() => signupWithHint("resident")}>Create account</button>
+                </div>
+              </div>
+            ) : (
+              <div className="stack">
+                <div className="panel panelAccentBlue">
+                  <h3 className="noTopMargin">Council Discounts & Vouchers</h3>
+                  <div className="muted">Redeem your recycling credits for council services and local discounts</div>
+                </div>
+
+                <div className="panel rowBetween wrap">
+                  <div>
+                    <div className="muted">Available Points</div>
+                    <div className="moneyBig">{points}</div>
+                  </div>
+                  <div className="muted" style={{ textAlign: "right" }}>
+                    <div>1 point = $2.00 earned</div>
+                    <div>= ${(points * 2.0).toFixed(2)} value</div>
+                  </div>
+                </div>
+
+                <div className="gridVouchers">
+                  {voucherOptions.map((v) => (
+                    <VoucherCard
+                      key={v.title}
+                      title={v.title}
+                      desc={v.desc}
+                      points={v.points}
+                      disabled={points < v.points}
+                      onRedeem={() => redeemVoucher(v)}
+                    />
                   ))}
                 </div>
               </div>
-            )}
-          </div>
-
-          <div className="panel stack">
-            <h3 className="noTopMargin" id="data-wiping">Data wiping help</h3>
-            <div className="muted">Simple steps to protect your personal data before recycling:</div>
-
-            <div className="gridTwo">
-              <div className="panel soft">
-                <h4 className="noTopMargin">Phones (iPhone/Android)</h4>
-                <ul className="stack">
-                  <li>Back up photos/files you want to keep.</li>
-                  <li>Sign out of your Apple ID / Google account.</li>
-                  <li>Turn off activation lock / “Find My”.</li>
-                  <li>Run “Factory reset” from Settings.</li>
-                </ul>
-              </div>
-
-              <div className="panel soft">
-                <h4 className="noTopMargin">Laptops (Windows/macOS)</h4>
-                <ul className="stack">
-                  <li>Back up files.</li>
-                  <li>Sign out of accounts and de-authorise apps if needed.</li>
-                  <li>Use “Reset this PC” (Windows) or “Erase All Content and Settings” (macOS).</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="muted">
-              Iteration 2
-            </div>
-          </div>
-        </div>
-      )}
-
-      {activeTab === "incentives" && (
-        incentivesLocked ? (
-          <div className="panel">
-            <h2 className="noTopMargin">My Recycling Incentives</h2>
-            <div className="muted">
-              Sign in with a Resident account to view your balance and transactions.
-            </div>
-            <div className="row wrap mt12">
-              <button className="btnPrimary" type="button" onClick={() => loginWithHint("resident")}>
-                Sign in
-              </button>
-              <button className="btnSecondary" type="button" onClick={() => signupWithHint("resident")}>
-                Create account
-              </button>
-            </div>
-
-          </div>
-        ) : (
-          <div className="stack">
-            <div className="stack">
-              <h2 className="noTopMargin">My Recycling Incentives</h2>
-              <div className="muted">Welcome, {displayName}. Earn $2.00 credit for each item recycled properly</div>
-            </div>
-
-            <div className="panel">
-              <div className="muted">Available Balance</div>
-              <div className="moneyBig">${availableCredit.toFixed(2)}</div>
-            </div>
-
-            <div className="stack">
-              <h3 className="noTopMargin">Recent Transactions</h3>
-              <div className="gridTx">
-                {transactions.map((t) => (
-                  <TxRow key={`${t.item}-${t.date}`} {...t} />
-                ))}
-              </div>
-            </div>
-          </div>
-        )
-      )}
-
-      {activeTab === "partners" && (
-        <div className="stack">
-          <div className="stack">
-            <h2 className="noTopMargin">Recycling Partners & Special Deals</h2>
-            <div className="muted">Find authorized recycling partners and exclusive deals</div>
-          </div>
-
-          <div className="gridPartners">
-            {partners.map((p) => (
-              <PartnerCard key={p.name} {...p} />
-            ))}
-          </div>
-          <div className="muted" style={{ marginTop: 8 }}>
-            Links open official program pages / location finders. Availability varies by suburb and item type—check the provider page for accepted items and hours.
-          </div>
-
-        </div>
-      )}
-
-      {activeTab === "vouchers" && (
-        incentivesLocked ? (
-          <div className="panel">
-            <h2 className="noTopMargin">Council Discounts & Vouchers</h2>
-            <div className="muted">
-              Sign in with a Resident account to redeem vouchers.
-            </div>
-            <div className="row wrap mt12">
-              <button className="btnPrimary" type="button" onClick={() => loginWithHint("resident")}>
-                Sign in
-              </button>
-              <button className="btnSecondary" type="button" onClick={() => signupWithHint("resident")}>
-                Create account
-              </button>
-            </div>
-
-          </div>
-        ) : (
-          <div className="stack">
-            <div className="stack">
-              <h2 className="noTopMargin">Council Discounts & Vouchers</h2>
-              <div className="muted">Redeem your recycling credits for council services and local discounts</div>
-            </div>
-
-            <div className="panel rowBetween wrap">
-              <div>
-                <div className="muted">Available Points</div>
-                <div className="moneyBig">{points}</div>
-              </div>
-              <div className="muted" style={{ textAlign: "right" }}>
-                <div>1 point = $2.00 earned</div>
-                <div>= ${(points * 2.00).toFixed(2)} value</div>
-              </div>
-            </div>
-
-            <div className="gridVouchers">
-              {voucherOptions.map((v) => (
-                <VoucherCard
-                  key={v.title}
-                  title={v.title}
-                  desc={v.desc}
-                  points={v.points}
-                  disabled={points < v.points}
-                  onRedeem={() => redeemVoucher(v)}
-                />
-              ))}
-            </div>
-          </div>
-        )
-      )}
-    </div>
+            )
+          )}
+        </Section>
+      </main>
+    </>
   );
 }
