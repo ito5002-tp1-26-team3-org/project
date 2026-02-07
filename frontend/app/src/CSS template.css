@@ -1,0 +1,138 @@
+.logo-customizable {
+  max-width: 180px;
+  max-height: 56px;
+}
+
+/* Top banner */
+.banner-customizable {
+  padding: 22px 0px 18px 0px;
+  background:
+    radial-gradient(700px 220px at 10% 0%, rgba(15,118,110,.12), transparent 60%),
+    radial-gradient(700px 220px at 90% 0%, rgba(59,130,246,.10), transparent 60%),
+    #ffffff;
+  border-bottom: 1px solid rgba(15, 23, 42, .12);
+}
+
+/* Labels */
+.label-customizable {
+  font-weight: 700;
+  color: #0b1220;
+  letter-spacing: .2px;
+}
+
+/* Legal text */
+.legalText-customizable {
+  color: #5a6775;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* Primary action button */
+.submitButton-customizable {
+  font-size: 14px;
+  font-weight: 800;
+  margin: 18px 0px 10px 0px;
+  height: 44px;
+  width: 100%;
+  color: #ffffff;
+
+  /* App primary: #0f766e */
+  background-color: #0f766e;
+  border: 1px solid rgba(15,118,110,.40);
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(2, 6, 23, .10);
+  cursor: pointer;
+}
+
+.submitButton-customizable:hover {
+  color: #ffffff;
+  background-color: #0d6b64;
+  border-color: rgba(15,118,110,.55);
+}
+
+/* Error message */
+.errorMessage-customizable {
+  padding: 10px 12px;
+  font-size: 13px;
+  width: 100%;
+  background: rgba(212, 24, 61, .08);
+  border: 1px solid rgba(212, 24, 61, .35);
+  color: #b42318;
+  border-radius: 12px;
+}
+
+/* Inputs */
+.inputField-customizable {
+  width: 100%;
+  height: 40px;
+  color: #0b1220;
+  background-color: #ffffff;
+  border: 1px solid rgba(15, 23, 42, .18);
+  border-radius: 12px;
+  padding: 0 12px;
+}
+
+.inputField-customizable:focus {
+  border-color: rgba(15, 118, 110, .60);
+  outline: 0;
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, .14);
+}
+
+/* IDP button (SSO providers) */
+.idpButton-customizable {
+  height: 44px;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 12px;
+
+  color: #0b1220;
+  background-color: rgba(255,255,255,.92);
+  border: 1px solid rgba(15, 23, 42, .12);
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(2, 6, 23, .08);
+  cursor: pointer;
+}
+
+.idpButton-customizable:hover {
+  background-color: rgba(255,255,255,1);
+}
+
+/* Social buttons */
+.socialButton-customizable {
+  border-radius: 999px;
+  height: 44px;
+  margin-bottom: 12px;
+  padding: 6px 10px;
+  text-align: left;
+  width: 100%;
+
+  border: 1px solid rgba(15, 23, 42, .12);
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 6px 18px rgba(2, 6, 23, .08);
+}
+
+/* Redirect area */
+.redirect-customizable {
+  text-align: center;
+  color: #755a5a;
+  font-size: 13px;
+}
+
+/* Password checks */
+.passwordCheck-notValid-customizable {
+  color: #b42318;
+  font-weight: 700;
+}
+
+.passwordCheck-valid-customizable {
+  color: #1a7f37;
+  font-weight: 700;
+}
+
+/* Page background */
+.background-customizable {
+  background:
+    radial-gradient(900px 500px at 15% 0%, rgba(15,118,110,.10), transparent 55%),
+    radial-gradient(900px 550px at 85% 10%, rgba(59,130,246,.08), transparent 55%),
+    #ffffff;
+}
