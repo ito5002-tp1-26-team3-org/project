@@ -72,9 +72,6 @@ function PageHero({ kicker, title, subtitle, right, variant = "teal" }) {
 }
 
 
-
-
-
 function mapsLink(address, suburb) {
   const q = encodeURIComponent([address, suburb].filter(Boolean).join(", "));
   return `https://www.google.com/maps/search/?api=1&query=${q}`;
@@ -354,38 +351,38 @@ export default function Resident() {
 
   const partners = [
     {
-      name: "TechCollect (free e-waste drop-off)",
-      deal: "Find your nearest drop-off site",
-      address: "Australia-wide partner program (councils & sites)",
+      name: "TechCollect",
+      deal: "Free e-waste drop-off",
+      address: "Australia-wide partner program",
       phone: "1300 229 837",
       url: "https://techcollect.com.au/our-locations/",
     },
     {
-      name: "MobileMuster (phones & accessories)",
+      name: "MobileMuster",
       deal: "Free drop-off + free post-back options",
       address: "Mobile phones, chargers, accessories",
-      phone: "See website",
+      phone: "",
       url: "https://www.mobilemuster.com.au/recycle-a-mobile/",
     },
     {
-      name: "Ecycle Solutions (TVs, computers, printers)",
-      deal: "Find a nearby e-waste drop-off location",
+      name: "Ecycle Solutions",
+      deal: "TVs, computers, printers",
       address: "National network of drop-off sites",
-      phone: "See website",
+      phone: "",
       url: "https://ecyclesolutions.net.au/drop-off-locations/",
     },
     {
-      name: "RecyclingNearYou (directory)",
-      deal: "Search by suburb/postcode for e-waste options",
+      name: "RecyclingNearYou",
+      deal: "Search by suburb for e-waste options",
       address: "Run by Planet Ark – location directory",
-      phone: "See website",
+      phone: "",
       url: "https://recyclingnearyou.com.au/",
     },
     {
-      name: "Sustainability Victoria (official guidance)",
+      name: "Sustainability Victoria",
       deal: "How/where to recycle e-waste in Victoria",
       address: "State guidance + links to drop-off programs",
-      phone: "See website",
+      phone: "",
       url: "https://www.sustainability.vic.gov.au/recycling-and-reducing-waste-at-home/recycling-at-home/e-waste",
     },
   ];
@@ -462,7 +459,7 @@ export default function Resident() {
               </div>
               <div className="row wrap mt12" style={{ justifyContent: "center" }}>
                 <button className="btnPrimary" type="button" onClick={() => loginWithHint("resident")}>
-                  Resident Sign In
+                  Sign in
                 </button>
                 <button className="btnSecondary" type="button" onClick={() => signupWithHint("resident")}>
                   Create account
@@ -617,8 +614,8 @@ export default function Resident() {
               </div>
 
               <div className="panel panelAccentPurple stack">
-                <h3 className="noTopMargin" id="data-wiping">Data wiping help</h3>
-                <div className="muted">Simple steps to protect your personal data before recycling:</div>
+                <h3 className="noTopMargin" id="data-wiping">Data wiping</h3>
+                <div className="muted">Simple steps to protect your personal data before recycling</div>
 
                 <div className="gridTwo">
                   <div className="panel soft">
@@ -640,8 +637,6 @@ export default function Resident() {
                     </ul>
                   </div>
                 </div>
-
-                <div className="muted">Iteration 2</div>
               </div>
             </div>
           )}
@@ -752,7 +747,7 @@ export default function Resident() {
               ?.scrollIntoView({ behavior: "smooth", block: "start" })
           }
         >
-          <span className="scrollCueText">Features</span>
+          <span className="scrollCueText">💡 Features</span>
           <span className="scrollCueIcon" aria-hidden="true">↓</span>
         </button>
 

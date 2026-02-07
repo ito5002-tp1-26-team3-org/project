@@ -103,7 +103,7 @@ export default function Staff() {
           <div className="panel panelCallout panelCallout-warn">
             <b>Staff access requirement</b>
             <div className="muted mt8">
-              Staff access is restricted to users who register with a <b>@victoria.ca</b> email address.
+              Access is restricted to Victoria council staff.
             </div>
           </div>
 
