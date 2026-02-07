@@ -1460,6 +1460,8 @@ details[open] .chev {
   color: var(--foreground);
   text-decoration: none !important;
   font-weight: 900;
+
+  cursor: pointer;
 }
 
 .scrollCue:hover {
@@ -1488,6 +1490,10 @@ details[open] .chev {
   animation: scrollCueBounce 1.4s ease-in-out infinite;
 }
 
+.scrollCue * {
+  cursor: pointer;
+}
+
 @keyframes scrollCueBounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(4px); }
@@ -1495,4 +1501,117 @@ details[open] .chev {
 
 @media (prefers-reduced-motion: reduce) {
   .scrollCueIcon { animation: none; }
+}
+
+.scrollAnchor {
+  scroll-margin-top: 200px;
+}
+
+/* =========================
+   PageHero title art
+   ========================= */
+.pageHeroWrap{
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+.pageHeroTitleArt{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+
+  padding: 12px 16px;
+  border-radius: 999px;
+
+  background: rgba(255,255,255,.82);
+  backdrop-filter: blur(10px);
+  border: 3px solid var(--border);
+  box-shadow: var(--shadow-sm);
+
+  overflow: hidden;
+}
+
+.pageHeroTitleArt::after{
+  content:"";
+  position: absolute;
+  inset: -40%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,.45),
+    transparent
+  );
+  transform: rotate(12deg);
+  opacity: .35;
+  pointer-events: none;
+}
+.pageHeroBloom{
+  position: absolute;
+  inset: -18px -26px;
+  border-radius: 999px;
+  background:
+    radial-gradient(240px 90px at 20% 40%, var(--accent-teal), transparent 62%),
+    radial-gradient(240px 90px at 70% 20%, var(--accent-blue), transparent 62%),
+    radial-gradient(240px 90px at 80% 70%, var(--accent-amber), transparent 62%);
+  filter: blur(2px);
+  opacity: .9;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pageHeroTitleArt > *{
+  position: relative;
+  z-index: 1;
+}
+
+/* side lines */
+.pageHeroRule{
+  width: clamp(32px, 7vw, 90px);
+  height: 8px;
+  border-radius: 999px;
+  opacity: .5;
+  background: linear-gradient(90deg,
+    rgba(15,118,110,.0),
+    rgba(15,118,110,.55),
+    rgba(59,130,246,.40),
+    rgba(245,158,11,.35)
+  );
+}
+
+.pageHeroRule.right{
+  transform: scaleX(-1);
+}
+
+/* dot cluster */
+.pageHeroDots{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pageHeroDot{
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 14px rgba(2,6,23,.10);
+}
+
+.pageHeroDot.teal{ background: rgba(15,118,110,.85); border-color: rgba(15,118,110,.28); }
+.pageHeroDot.blue{ background: rgba(59,130,246,.85); border-color: rgba(59,130,246,.28); }
+.pageHeroDot.amber{ background: rgba(245,158,11,.88); border-color: rgba(245,158,11,.28); }
+.pageHeroDot.purple{ background: rgba(139,92,246,.85); border-color: rgba(139,92,246,.28); }
+
+.pageHeroSubtitlePill{
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.78);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  max-width: 900px;
 }

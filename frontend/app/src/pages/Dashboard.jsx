@@ -7,37 +7,71 @@ import { logout as cognitoLogout, getGroupsFromUser } from "../auth/authService"
 import logo from "../51009.jpg";
 
 
-function PageHero({ kicker, title, subtitle, right }) {
+function PageHero({ kicker, title, subtitle, right, variant = "teal" }) {
+  // pick 3 dots based on variant
+  const dotSets = {
+    teal: ["teal", "blue", "amber"],
+    blue: ["blue", "teal", "purple"],
+    amber: ["amber", "teal", "blue"],
+    purple: ["purple", "blue", "teal"],
+  };
+  const dots = dotSets[variant] || dotSets.teal;
+
   return (
-    <div className="panel panelAccentBlue" style={{ padding: 18, borderRadius: 18 }}>
-      <div className="rowBetween" style={{ gap: 14, flexWrap: "wrap" }}>
-        <div>
-          {kicker ? (
-            <div className="kicker" style={{ letterSpacing: 1.2, textTransform: "uppercase" }}>
-              {kicker}
-            </div>
-          ) : null}
+    <div className="pageHeroWrap" style={{ paddingTop: 6 }}>
+      <div className="stack" style={{ alignItems: "center", gap: 10, width: "100%" }}>
+        {kicker ? (
+          <div className="kicker" style={{ letterSpacing: 1.2, textTransform: "uppercase" }}>
+            {kicker}
+          </div>
+        ) : null}
+
+        {/* capsule-only title art */}
+        <div className="pageHeroTitleArt" role="banner" aria-label={title}>
+          <span className="pageHeroBloom" aria-hidden="true" />
+
+          <span className="pageHeroDots" aria-hidden="true">
+            <span className={`pageHeroDot ${dots[0]}`} />
+            <span className={`pageHeroDot ${dots[1]}`} />
+            <span className={`pageHeroDot ${dots[2]}`} />
+          </span>
+
+          <span className="pageHeroRule" aria-hidden="true" />
 
           <h1
             className="noTopMargin"
             style={{
-              marginBottom: 6,
+              margin: 0,
               fontSize: "clamp(28px, 3vw, 40px)",
               letterSpacing: 1.2,
               textTransform: "uppercase",
+              lineHeight: 1.1,
             }}
           >
             {title}
           </h1>
 
-          {subtitle ? <div className="muted">{subtitle}</div> : null}
+          <span className="pageHeroRule right" aria-hidden="true" />
+
+          <span className="pageHeroDots" aria-hidden="true">
+            <span className={`pageHeroDot ${dots[2]}`} />
+            <span className={`pageHeroDot ${dots[1]}`} />
+            <span className={`pageHeroDot ${dots[0]}`} />
+          </span>
         </div>
 
-        {right ? <div>{right}</div> : null}
+        {subtitle ? (
+          <div className="pageHeroSubtitlePill">
+            <div className="muted">{subtitle}</div>
+          </div>
+        ) : null}
+
+        {right ? <div style={{ marginTop: 6 }}>{right}</div> : null}
       </div>
     </div>
   );
 }
+
 
 
 function pct(x) {
@@ -375,10 +409,8 @@ export default function Dashboard() {
       </div>
 
       <main className="container stack">
-        <PageHero
-          title="Council Dashboard"
-          right={<span className="iconTag iconTeal">Restricted</span>}
-        />
+        <PageHero variant="blue" title="COUNCIL DASHBOARD" />
+
 
         <Section
           title="Welcome"
@@ -398,7 +430,7 @@ export default function Dashboard() {
             <div className="panel soft">
               <div className="muted">
                 Signed in as <b>{displayName}</b>{email ? <> (<b>{email}</b>)</> : null}
-                {groups.length ? <> • Groups: <b>{groups.join(", ")}</b></> : null}
+                {groups.length ? <> • <b>{groups.join(", ")}</b></> : null}
               </div>
             </div>
           ) : null}
@@ -427,6 +459,8 @@ export default function Dashboard() {
               subtitle="Select year/council, then download ranking or council trend CSVs."
               right={<span className="iconTag iconBlue">Source: {data.sourceSheet}</span>}
             >
+              <div id="dashboard-sections" className="scrollAnchor" />
+              {/* Filters + exports */}
               <div className="gridTwo">
                 <div className="panel panelAccent stack">
                   <div className="sectionHeader">
@@ -744,7 +778,24 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+
+        <button
+          type="button"
+          className="scrollCue"
+          aria-label="Scroll for more"
+          title="Scroll for more"
+          onClick={() =>
+            document
+              .getElementById("dashboard-sections")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
+        >
+          <span className="scrollCueText">Filter</span>
+          <span className="scrollCueIcon" aria-hidden="true">↓</span>
+        </button>
       </main>
+
     </>
+
   );
 }
