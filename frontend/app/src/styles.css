@@ -59,6 +59,7 @@
 
 html {
   font-size: var(--font-size);
+  scroll-behavior: smooth;
 }
 
 body {
@@ -1434,3 +1435,64 @@ details[open] .chev {
 .statCard-amber .statLabelPill{ background: rgba(245,158,11,.92); }
 .statCard-rose .statLabelPill{ background: rgba(244,63,94,.90); }
 .statCard-purple .statLabelPill{ background: rgba(139,92,246,.90); }
+
+/* =========================
+   Floating scroll cue (Home)
+   ========================= */
+.scrollCue {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 30;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 12px;
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.80);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+
+  color: var(--foreground);
+  text-decoration: none !important;
+  font-weight: 900;
+}
+
+.scrollCue:hover {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.scrollCueText {
+  font-size: 12px;
+  letter-spacing: .22px;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.scrollCueIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(15, 118, 110, .14);
+  border: 1px solid rgba(15, 118, 110, .22);
+  color: var(--foreground);
+
+  animation: scrollCueBounce 1.4s ease-in-out infinite;
+}
+
+@keyframes scrollCueBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrollCueIcon { animation: none; }
+}

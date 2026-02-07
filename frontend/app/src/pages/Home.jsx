@@ -301,7 +301,6 @@ export default function Home() {
         </Section>
       </main>
 
-      {/* ✅ Full-width footer (outside container) */}
       <footer className="footer">
         <div className="footerInner">
           <div className="panel footerPanel">
@@ -346,6 +345,16 @@ export default function Home() {
           </div>
         </div>
       </footer>
+      {/* Floating scroll cue */}
+      <a
+        href="#guidance"
+        className="scrollCue"
+        aria-label="Scroll for more information"
+        title="Scroll for more"
+      >
+        <span className="scrollCueText">More</span>
+        <span className="scrollCueIcon" aria-hidden="true">↓</span>
+      </a>
 
     </>
   );
