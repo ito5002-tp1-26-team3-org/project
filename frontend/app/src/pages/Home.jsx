@@ -229,8 +229,10 @@ export default function Home() {
         </Section>
 
         {/* Guidance */}
+        
         <Section id="guidance" title="Guidance" subtitle="Expand sections for more details">
           <div className="stack">
+            <div id="resident-sections" className="scrollAnchor" />
             <Disclosure title="How the platform works" subtitle="Simple steps for residents and councils.">
               <ol className="stack">
                 <li>
@@ -345,16 +347,20 @@ export default function Home() {
           </div>
         </div>
       </footer>
-      {/* Floating scroll cue */}
-      <a
-        href="#guidance"
-        className="scrollCue"
-        aria-label="Scroll for more information"
-        title="Scroll for more"
-      >
-        <span className="scrollCueText">More</span>
-        <span className="scrollCueIcon" aria-hidden="true">↓</span>
-      </a>
+      <button
+          type="button"
+          className="scrollCue"
+          aria-label="Scroll for more"
+          title="Scroll for more"
+          onClick={() =>
+            document
+              .getElementById("resident-sections")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
+        >
+          <span className="scrollCueText">Get Help</span>
+          <span className="scrollCueIcon" aria-hidden="true">↓</span>
+        </button>
 
     </>
   );

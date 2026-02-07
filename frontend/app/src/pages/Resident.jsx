@@ -6,37 +6,73 @@ import { isInGroup, loginWithHint, logout, signupWithHint } from "../auth/authSe
 import logo from "../51009.jpg";
 
 
-function PageHero({ kicker, title, subtitle, right }) {
+function PageHero({ kicker, title, subtitle, right, variant = "teal" }) {
+
+  const dotSets = {
+    teal: ["teal", "blue", "amber"],
+    blue: ["blue", "teal", "purple"],
+    amber: ["amber", "teal", "blue"],
+    purple: ["purple", "blue", "teal"],
+  };
+  const dots = dotSets[variant] || dotSets.teal;
+
   return (
-    <div className="panel panelAccentBlue" style={{ padding: 18, borderRadius: 18 }}>
-      <div className="rowBetween" style={{ gap: 14, flexWrap: "wrap" }}>
-        <div>
-          {kicker ? (
-            <div className="kicker" style={{ letterSpacing: 1.2, textTransform: "uppercase" }}>
-              {kicker}
-            </div>
-          ) : null}
+    <div className="pageHeroWrap" style={{ paddingTop: 6 }}>
+      <div className="stack" style={{ alignItems: "center", gap: 10, width: "100%" }}>
+        {kicker ? (
+          <div className="kicker" style={{ letterSpacing: 1.2, textTransform: "uppercase" }}>
+            {kicker}
+          </div>
+        ) : null}
+
+        {/* capsule-only title art */}
+        <div className="pageHeroTitleArt" role="banner" aria-label={title}>
+          <span className="pageHeroBloom" aria-hidden="true" />
+
+          <span className="pageHeroDots" aria-hidden="true">
+            <span className={`pageHeroDot ${dots[0]}`} />
+            <span className={`pageHeroDot ${dots[1]}`} />
+            <span className={`pageHeroDot ${dots[2]}`} />
+          </span>
+
+          <span className="pageHeroRule" aria-hidden="true" />
 
           <h1
             className="noTopMargin"
             style={{
-              marginBottom: 6,
+              margin: 0,
               fontSize: "clamp(28px, 3vw, 40px)",
               letterSpacing: 1.2,
               textTransform: "uppercase",
+              lineHeight: 1.1,
             }}
           >
             {title}
           </h1>
 
-          {subtitle ? <div className="muted">{subtitle}</div> : null}
+          <span className="pageHeroRule right" aria-hidden="true" />
+
+          <span className="pageHeroDots" aria-hidden="true">
+            <span className={`pageHeroDot ${dots[2]}`} />
+            <span className={`pageHeroDot ${dots[1]}`} />
+            <span className={`pageHeroDot ${dots[0]}`} />
+          </span>
         </div>
 
-        {right ? <div>{right}</div> : null}
+        {subtitle ? (
+          <div className="pageHeroSubtitlePill">
+            <div className="muted">{subtitle}</div>
+          </div>
+        ) : null}
+
+        {right ? <div style={{ marginTop: 6 }}>{right}</div> : null}
       </div>
     </div>
   );
 }
+
+
+
 
 
 function mapsLink(address, suburb) {
@@ -395,10 +431,7 @@ export default function Resident() {
 
       {/* Constrained content */}
       <main className="container stack">
-        <PageHero
-          title="Resident Portal"
-          subtitle="Guidance, drop-off finder, and rewards."
-        />
+        <PageHero variant="amber" title="RESIDENT PORTAL" />
 
         <Section
           title="Sign-in details"
@@ -491,6 +524,7 @@ export default function Resident() {
             </span>
           }
         >
+          <div id="resident-sections" className="scrollAnchor" />
           <div className="tabs" role="tablist" aria-label="Resident features">
             <TabButton id="guides" activeTab={activeTab} setActiveTab={setActiveTab}>Disposal Guides</TabButton>
             <TabButton id="incentives" activeTab={activeTab} setActiveTab={setActiveTab}>
@@ -707,6 +741,21 @@ export default function Resident() {
             )
           )}
         </Section>
+        <button
+          type="button"
+          className="scrollCue"
+          aria-label="Scroll for more"
+          title="Scroll for more"
+          onClick={() =>
+            document
+              .getElementById("resident-sections")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
+        >
+          <span className="scrollCueText">Features</span>
+          <span className="scrollCueIcon" aria-hidden="true">↓</span>
+        </button>
+
       </main>
     </>
   );
