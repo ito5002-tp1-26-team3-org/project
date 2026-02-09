@@ -214,8 +214,8 @@ export default function Home() {
             />
             <StatCard
               variant="amber"
-              value="Risk score"
-              label="Proxy for missed recycling"
+              value="98%"
+              label="Material Recovery Rate"
             />
           </div>
         </Section>
@@ -300,7 +300,7 @@ export default function Home() {
           <div className="panel footerPanel">
             <div className="footerGrid">
               <div>
-                <b>E-Waste Manager</b>
+                <b>♻️E-Waste Manager</b>
                 <div className="muted">
                   A practical tool for responsible disposal and data-informed local decision-making.
                 </div>
