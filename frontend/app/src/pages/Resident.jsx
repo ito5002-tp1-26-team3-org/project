@@ -219,10 +219,15 @@ export default function Resident() {
   const isStaffUser = authed && isInGroup(user, "Staff");
 
   const displayName =
+    user?.profile?.preferred_username ||
+    user?.profile?.["cognito:username"] ||
+    user?.profile?.username ||
+    user?.profile?.nickname ||
     user?.profile?.name ||
     user?.profile?.given_name ||
     user?.profile?.email ||
     "Member";
+
 
   const incentivesLocked = !isResidentUser;
 

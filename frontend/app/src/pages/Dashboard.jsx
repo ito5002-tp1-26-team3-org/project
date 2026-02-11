@@ -8,7 +8,6 @@ import logo from "../51009.jpg";
 
 
 function PageHero({ kicker, title, subtitle, right, variant = "teal" }) {
-  // pick 3 dots based on variant
   const dotSets = {
     teal: ["teal", "blue", "amber"],
     blue: ["blue", "teal", "purple"],
@@ -71,7 +70,6 @@ function PageHero({ kicker, title, subtitle, right, variant = "teal" }) {
     </div>
   );
 }
-
 
 
 function pct(x) {
@@ -206,10 +204,15 @@ export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
 
   const displayName =
+    user?.profile?.preferred_username ||
+    user?.profile?.["cognito:username"] ||
+    user?.profile?.username ||
+    user?.profile?.nickname ||
     user?.profile?.name ||
     user?.profile?.given_name ||
     user?.profile?.email ||
     "Staff";
+
 
   const email = user?.profile?.email || "";
   const groups = user ? getGroupsFromUser(user) : [];
@@ -429,7 +432,7 @@ export default function Dashboard() {
           {!authLoading && user ? (
             <div className="panel soft">
               <div className="muted">
-                Signed in as <b>{displayName}</b>{email ? <> (<b>{email}</b>)</> : null}
+                Signed in as <b>{displayName}</b>
                 {groups.length ? <> • <b>{groups.join(", ")} 🧑‍💼</b></> : null}
               </div>
             </div>
