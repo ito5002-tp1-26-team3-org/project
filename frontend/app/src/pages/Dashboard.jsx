@@ -6,6 +6,29 @@ import { useAuth } from "../auth/AuthProvider";
 import { logout as cognitoLogout, getGroupsFromUser } from "../auth/authService";
 import logo from "../51009.jpg";
 
+function InlineYearSelector({ years, yearStart, setYearStart }) {
+  if (!years?.length) return null;
+
+  return (
+    <div className="panel soft" style={{ padding: 12 }}>
+      <div className="rowBetween wrap" style={{ gap: 12 }}>
+
+        <label className="row" style={{ gap: 8 }}>
+          <b>Select Year</b>
+          <select
+            value={yearStart ?? ""}
+            onChange={(e) => setYearStart(Number(e.target.value))}
+          >
+            {years.map((y) => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+    </div>
+  );
+}
+
 
 function PageHero({ kicker, title, subtitle, right, variant = "teal" }) {
   const dotSets = {
@@ -636,16 +659,21 @@ export default function Dashboard() {
 
               {/* Map */}
               {activeTab === "map" && (
-                <div className="panel mapPanel panelAccent">
-                  <div className="mapViewport">
-                    <CouncilRiskMap
-                      ranking={ranking}
-                      selectedCouncil={selectedCouncil}
-                      onSelectCouncil={setSelectedCouncil}
-                    />
+                <div className="stack">
+                  <InlineYearSelector years={years} yearStart={yearStart} setYearStart={setYearStart} />
+
+                  <div className="panel mapPanel panelAccent">
+                    <div className="mapViewport">
+                      <CouncilRiskMap
+                        ranking={ranking}
+                        selectedCouncil={selectedCouncil}
+                        onSelectCouncil={setSelectedCouncil}
+                      />
+                    </div>
                   </div>
                 </div>
               )}
+
 
               {/* Ranking */}
               {activeTab === "ranking" && (
