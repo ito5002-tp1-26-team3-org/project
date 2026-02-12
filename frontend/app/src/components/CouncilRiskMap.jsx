@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
+
 
 function normCouncilName(s) {
     return String(s || "")
@@ -104,6 +105,18 @@ export default function CouncilRiskMap({ ranking, selectedCouncil, onSelectCounc
         return m;
     }, [ranking]);
 
+    // keep latest values available to Leaflet event handlers
+    const riskByCouncilRef = useRef(riskByCouncil);
+    const rankingRef = useRef(ranking);
+
+    useEffect(() => {
+        riskByCouncilRef.current = riskByCouncil;
+    }, [riskByCouncil]);
+
+    useEffect(() => {
+        rankingRef.current = ranking;
+    }, [ranking]);
+
     if (err) return <p style={{ color: "crimson" }}>{err}</p>;
     if (!geo) return <p>Loading map…</p>;
 
@@ -138,17 +151,45 @@ export default function CouncilRiskMap({ ranking, selectedCouncil, onSelectCounc
                         }}
                         onEachFeature={(feature, layer) => {
                             const rawName = feature?.properties?.[nameProp] ?? "Unknown";
-                            const risk = riskByCouncil.get(normCouncilName(rawName));
-                            const riskLabel = risk == null || Number.isNaN(risk) ? "N/A" : Number(risk).toFixed(2);
-                            layer.bindTooltip(`${rawName} — Risk: ${riskLabel}%`);
+                            const norm = normCouncilName(rawName);
 
+                            const makeTooltip = () => {
+                                const latestRisk = riskByCouncilRef.current?.get(norm);
+                                const riskLabel =
+                                    latestRisk == null || Number.isNaN(latestRisk)
+                                        ? "N/A"
+                                        : Number(latestRisk).toFixed(2);
+                                return `${rawName} — Risk: ${riskLabel}%`;
+                            };
+
+                            // initial tooltip
+                            layer.bindTooltip(makeTooltip());
+
+                            // refresh tooltip content whenever the user hovers/moves
+                            const refreshTooltip = () => {
+                                const content = makeTooltip();
+                                if (typeof layer.setTooltipContent === "function") {
+                                    layer.setTooltipContent(content);
+                                } else if (layer.getTooltip?.()) {
+                                    layer.getTooltip().setContent(content);
+                                } else {
+                                    // fallback: rebind if needed
+                                    layer.unbindTooltip();
+                                    layer.bindTooltip(content);
+                                }
+                            };
+
+                            layer.on("mouseover", refreshTooltip);
+                            layer.on("mousemove", refreshTooltip);
 
                             layer.on("click", () => {
-                                const clickedNorm = normCouncilName(rawName);
-                                const match = (ranking || []).find((r) => normCouncilName(r.council) === clickedNorm);
+                                const match = (rankingRef.current || []).find(
+                                    (r) => normCouncilName(r.council) === norm
+                                );
                                 if (match) onSelectCouncil(match.council);
                             });
                         }}
+
                     />
                 </MapContainer>
                 <MapLegend />
