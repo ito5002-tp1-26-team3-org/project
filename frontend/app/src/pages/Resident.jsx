@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthProvider";
@@ -238,6 +238,10 @@ export default function Resident() {
   const rankProgress = `${lifetimeItems}/100`;
   const points = 458;
 
+  const [redeemPromptOpen, setRedeemPromptOpen] = useState(false);
+  const [redeemTarget, setRedeemTarget] = useState(null);
+
+
   const [activeTab, setActiveTab] = useState("guides");
 
   const [facilities, setFacilities] = useState([]);
@@ -245,6 +249,23 @@ export default function Resident() {
   const [submitted, setSubmitted] = useState("");
   const [loadingFacilities, setLoadingFacilities] = useState(true);
   const [facErr, setFacErr] = useState("");
+
+  const [toast, setToast] = useState(null);
+  const toastTimerRef = useRef(null);
+
+  function showToast(next) {
+    setToast(next);
+
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToast(null), 3200);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, []);
+
 
   useEffect(() => {
     let cancelled = false;
@@ -398,9 +419,28 @@ export default function Resident() {
     { title: "$25 Local Business Voucher", desc: "Use at participating businesses", points: 250 },
   ];
 
-  function redeemVoucher(v) {
-    alert(`Demo: Redeemed "${v.title}" for ${v.points} points.`);
+  function requestRedeem(v) {
+    setRedeemTarget(v);
+    setRedeemPromptOpen(true);
   }
+
+  function confirmRedeem() {
+    if (redeemTarget) {
+      showToast({
+        title: "Voucher redeemed",
+        message: `Redeemed “${redeemTarget.title}” for ${redeemTarget.points} points.`,
+      });
+    }
+    setRedeemPromptOpen(false);
+    setRedeemTarget(null);
+  }
+
+
+  function cancelRedeem() {
+    setRedeemPromptOpen(false);
+    setRedeemTarget(null);
+  }
+
 
   return (
     <>
@@ -733,10 +773,60 @@ export default function Resident() {
                       desc={v.desc}
                       points={v.points}
                       disabled={points < v.points}
-                      onRedeem={() => redeemVoucher(v)}
+                      onRedeem={() => requestRedeem(v)}
                     />
                   ))}
                 </div>
+                {redeemPromptOpen && (
+                  <div
+                    role="dialog"
+                    aria-modal="true"
+                    style={{
+                      position: "fixed",
+                      inset: 0,
+                      background: "rgba(0,0,0,0.35)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: 16,
+                      zIndex: 9999,
+                    }}
+                    onClick={cancelRedeem}
+                  >
+                    <div
+                      className="panel"
+                      style={{ width: "min(560px, 100%)" }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <h3 className="noTopMargin">Confirm redemption</h3>
+
+                      <div className="muted">
+                        Are you sure you want to redeem{" "}
+                        <b>{redeemTarget?.title}</b> for <b>{redeemTarget?.points}</b> points?
+                      </div>
+
+                      <div className="row wrap mt12" style={{ gap: 10, justifyContent: "center" }}>
+                        <button
+                          className="btnPrimary"
+                          style={{ minWidth: 180 }}
+                          type="button"
+                          onClick={confirmRedeem}
+                        >
+                          Yes, redeem
+                        </button>
+                        <button
+                          className="btnSecondary"
+                          style={{ minWidth: 180 }}
+                          type="button"
+                          onClick={cancelRedeem}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
               </div>
             )
           )}
@@ -755,6 +845,26 @@ export default function Resident() {
           <span className="scrollCueText">💡 Features</span>
           <span className="scrollCueIcon" aria-hidden="true">↓</span>
         </button>
+        {toast && (
+          <div className="toast" role="status" aria-live="polite">
+            <div className="toastIcon" aria-hidden="true">✅</div>
+
+            <div className="toastBody">
+              <div className="toastTitle"><b>{toast.title}</b></div>
+              <div className="muted">{toast.message}</div>
+            </div>
+
+            <button
+              type="button"
+              className="toastClose"
+              aria-label="Dismiss notification"
+              onClick={() => setToast(null)}
+              title="Dismiss"
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
       </main>
     </>
